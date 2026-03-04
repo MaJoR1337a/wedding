@@ -1,0 +1,21 @@
+# Ignore OS and editor files
+.DS_Store
+Thumbs.db
+
+# VCS
+.git
+
+# Node deps / build outputs
+node_modules
+dist
+build
+
+# Minified or third-party bundles (don't reformat)
+*.min.js
+*.min.css
+
+# Tooling / misc
+.vscode
+.idea
+npm-debug.log
+yarn-error.log
