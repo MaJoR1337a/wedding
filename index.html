@@ -162,12 +162,20 @@ section{
   gap:20px;
   max-width:1000px;
   margin:0 auto;
+  perspective:1000px;
 }
 
 .gallery img{
   width:100%;
   border-radius:20px;
   box-shadow:0 15px 40px rgba(0,0,0,0.1);
+  transition:transform 0.1s ease-out;
+  cursor:pointer;
+  transform-origin:center;
+}
+
+.gallery img:hover{
+  transform:scale(1.05);
 }
 
 .dress-code{
@@ -250,8 +258,8 @@ footer{
 
 <body>
 
-<audio id="bgMusic" loop>
-  <source src="our-song.mp3" type="audio/mpeg">
+<audio id="bgMusic" loop autoplay muted>
+  <source src="alex-warren-ordinary.mp3" type="audio/mpeg">
   Ваш браузер не підтримує аудіо.
 </audio>
 
@@ -279,18 +287,20 @@ footer{
 </section>
 
 <section>
-  <h2>📸 Наші моменти</h2>
+  <h2>📸</h2>
   <div class="divider"></div>
   <div class="gallery">
     <img src="photo1.jpg">
     <img src="photo2.jpg">
     <img src="photo3.jpg">
     <img src="photo4.jpg">
+    <img src="photo5.jpg">
+    <img src="photo6.jpg">
   </div>
 </section>
 
 <section class="dress-code">
-  <h2>👗 Dress Code</h2>
+  <h2> <!--👗 -->Dress Code</h2>
   <div class="divider"></div>
   <p>Будемо раді бачити вас у теплих винно-карамельних відтінках.</p>
   <div class="palette">
@@ -307,13 +317,22 @@ footer{
   <h2>🥂 Підтвердження присутності</h2>
   <div class="divider"></div>
   <form id="rsvpForm">
-    <input type="text" placeholder="Ім’я та прізвище" required>
-    <select required>
+    <input type="text" name="name" placeholder="Ім'я та прізвище" required>
+    <select name="attendance" required>
       <option value="">Чи будете ви присутні?</option>
-      <option>Так, із задоволенням 🤍</option>
-      <option>На жаль, не зможу</option>
+      <option value="yes">Так, із задоволенням 🤍</option>
+      <option value="no">На жаль, не зможу</option>
     </select>
-    <textarea placeholder="Ваші побажання"></textarea>
+    <select name="alcohol" required>
+      <option value="">Який алкоголь ви будете пити?</option>
+      <option value="Вино">Вино 🍷</option>
+      <option value="Шампанське">Шампанське 🥂</option>
+      <option value="Горілка">Горілка</option>
+      <option value="Віскі">Віскі 🥃</option>
+      <option value="Коньяк">Коньяк</option>
+      <option value="Без алкоголю">Без алкоголю</option>
+    </select>
+    <textarea name="wishes" placeholder="Ваші побажання"></textarea>
     <button type="submit">Надіслати</button>
   </form>
   <p id="thanks" style="display:none;text-align:center;margin-top:20px;color:var(--cabernet);">Дякуємо 🤍</p>
@@ -355,8 +374,16 @@ function openInvite(){
     document.getElementById("envelope").style.display="none";
     document.getElementById("mainContent").style.display="block";
     createPetals();
+    // Включаем музику после открытия
+    const audio = document.getElementById("bgMusic");
+    audio.muted = false;
+    audio.play().catch(error => {
+      console.log("Музика не запустилась:", error);
+    });
+    musicBtn.textContent = "🔇";
+    isPlaying = true;
   },800);
-}
+} 
 
 function createPetals(){
   for(let i=0;i<30;i++){
@@ -392,10 +419,57 @@ function updateCountdown(){
 setInterval(updateCountdown,1000);
 updateCountdown();
 
-document.getElementById("rsvpForm").addEventListener("submit",function(e){
+// Эффект параллакса для фотографий
+document.querySelectorAll('.gallery img').forEach(img => {
+  img.addEventListener('mousemove', function(e) {
+    const rect = this.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    
+    const rotateX = (y - centerY) / 10;
+    const rotateY = (centerX - x) / 10;
+    const translateX = (x - centerX) / 20;
+    const translateY = (y - centerY) / 20;
+    
+    this.style.transform = `scale(1.05) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translate(${translateX}px, ${translateY}px)`;
+  });
+  
+  img.addEventListener('mouseleave', function() {
+    this.style.transform = 'scale(1) rotateX(0deg) rotateY(0deg) translate(0px, 0px)';
+  });
+
+});
+
+document.getElementById("rsvpForm").addEventListener("submit", async function(e){
   e.preventDefault();
-  document.getElementById("thanks").style.display="block";
-  this.reset();
+
+  const name = this.querySelector("input[name='name']").value;
+  const attendance = this.querySelector("select[name='attendance']").value;
+  const alcohol = this.querySelector("select[name='alcohol']").value;
+  const wishes = this.querySelector("textarea[name='wishes']").value;
+
+  const data = {
+    name: name,
+    attendance: attendance,
+    alcohol: alcohol,
+    wishes: wishes
+  };
+
+  try {
+    await fetch("https://script.google.com/macros/s/AKfycbwKaxAWQrS76ueztsFH8YB2_Pq_9-yxpq5f-c5mYwFtgc0fjZEjR8wMO7O9rVd1J7W0LA/exec", {
+      method: "POST",
+      body: JSON.stringify(data)
+    });
+
+    document.getElementById("thanks").style.display="block";
+    this.reset();
+  } catch (error) {
+    alert("Помилка відправки 😢");
+    console.log("Помилка:", error);
+  }
 });
 </script>
 
