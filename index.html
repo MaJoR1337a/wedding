@@ -107,13 +107,13 @@ h1{
 
 .script{
   font-family:'Great Vibes',cursive;
-  font-size:36px;
-  margin-top:20px;
+  font-size:48px;
+  margin-top:30px;
   color:var(--vanilla);
 }
 
 .hero p{
-  font-size:20px;
+  font-size:30px;
   margin:10px 0;
   color:var(--vanilla);
 }
@@ -253,6 +253,141 @@ footer{
   background:var(--almond);
   color:white;
 }
+
+/* Медиа-запросы для мобильних устройств */
+@media (max-width: 768px) {
+  .envelope-box {
+    width: 280px;
+    height: 180px;
+  }
+
+  .hero {
+    padding: 120px 20px;
+  }
+
+  h1 {
+    font-size: 40px;
+  }
+
+  .script {
+    font-size: 32px;
+  }
+
+  .hero p {
+    font-size: 20px;
+  }
+
+  section {
+    padding: 80px 20px;
+  }
+
+  #countdown {
+    gap: 15px;
+    font-size: 18px;
+  }
+
+  #countdown div {
+    padding: 15px 20px;
+    min-width: 70px;
+  }
+
+  #countdown span {
+    font-size: 24px;
+  }
+
+  .gallery {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+  }
+
+  .palette {
+    gap: 15px;
+  }
+
+  .color-box {
+    width: 80px;
+    height: 80px;
+  }
+
+  .color-name {
+    font-size: 12px;
+  }
+
+  footer {
+    padding: 40px 20px;
+  }
+
+  .music-btn {
+    top: 10px;
+    right: 10px;
+    padding: 8px 12px;
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .envelope-box {
+    width: 250px;
+    height: 160px;
+  }
+
+  h1 {
+    font-size: 32px;
+  }
+
+  .script {
+    font-size: 28px;
+  }
+
+  .hero p {
+    font-size: 18px;
+  }
+
+  section {
+    padding: 60px 15px;
+  }
+
+  #countdown {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  #countdown div {
+    padding: 10px 15px;
+    min-width: 60px;
+  }
+
+  #countdown span {
+    font-size: 20px;
+  }
+
+  .gallery {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+  }
+
+  .palette {
+    gap: 10px;
+  }
+
+  .color-box {
+    width: 60px;
+    height: 60px;
+  }
+
+  .color-name {
+    font-size: 10px;
+  }
+
+  button {
+    padding: 12px 30px;
+  }
+
+  footer {
+    padding: 30px 15px;
+    font-size: 14px;
+  }
+}
 </style>
 </head>
 
@@ -300,7 +435,7 @@ footer{
 </section>
 
 <section class="dress-code">
-  <h2> <!--👗 -->Dress Code</h2>
+  <h2>Dress Code</h2>
   <div class="divider"></div>
   <p>Будемо раді бачити вас у теплих винно-карамельних відтінках.</p>
   <div class="palette">
