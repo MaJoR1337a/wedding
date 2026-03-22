@@ -254,6 +254,36 @@ footer{
   color:white;
 }
 
+/* Lightbox для збільшення фото */
+.lightbox {
+  display: none;
+  position: fixed;
+  z-index: 10000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.9);
+  justify-content: center;
+  align-items: center;
+}
+
+.lightbox img {
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
+}
+
+.close {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  color: white;
+  font-size: 40px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
 /* Медиа-запросы для мобильних устройств */
 @media (max-width: 768px) {
   .envelope-box {
@@ -664,7 +694,32 @@ document.getElementById("rsvpForm").addEventListener("submit", async function(e)
     console.log("Помилка:", error);
   }
 });
+
+// Функції для lightbox
+function openLightbox(src) {
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightbox-img');
+  lightboxImg.src = src;
+  lightbox.style.display = 'flex';
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').style.display = 'none';
+}
+
+// Додати обробники подій для всіх зображень у галереях
+document.querySelectorAll('.gallery img, .location-grid img').forEach(img => {
+  img.addEventListener('click', function() {
+    openLightbox(this.src);
+  });
+});
 </script>
+
+<!-- Lightbox для збільшення фото -->
+<div id="lightbox" class="lightbox" onclick="closeLightbox()">
+  <span class="close" onclick="closeLightbox()">&times;</span>
+  <img id="lightbox-img" onclick="event.stopPropagation()">
+</div>
 
 </body>
 </html>
