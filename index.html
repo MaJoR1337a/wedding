@@ -356,6 +356,35 @@ input,select,textarea{
   border:1px solid #ddd;
 }
 
+/* Стилі для чекбоксів алкоголю */
+.alcohol-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.alcohol-label {
+  display: flex;
+  align-items: center;
+  background: white;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.2s;
+}
+.alcohol-label:hover {
+  border-color: var(--cabernet);
+  background: #fff5f0;
+}
+.alcohol-label input {
+  width: auto;
+  margin: 0 10px 0 0;
+  height: auto;
+  padding: 0;
+}
+
 button{
   padding:15px 40px;
   border:none;
@@ -426,6 +455,26 @@ button:hover{
   font-weight: bold;
   cursor: pointer;
 }
+
+.prev, .next {
+  cursor: pointer;
+  position: absolute;
+  top: 50%;
+  width: auto;
+  padding: 16px;
+  margin-top: -50px;
+  color: white;
+  font-weight: bold;
+  font-size: 30px;
+  transition: 0.6s ease;
+  border-radius: 0 3px 3px 0;
+  user-select: none;
+  z-index: 10001;
+  text-decoration: none;
+}
+.next { right: 0; border-radius: 3px 0 0 3px; }
+.prev { left: 0; border-radius: 3px 0 0 3px; }
+.prev:hover, .next:hover { background-color: rgba(0,0,0,0.8); }
 
 /* Медиа-запросы для мобильних устройств */
 @media (max-width: 768px) {
@@ -761,15 +810,17 @@ button:hover{
       <option value="yes">Так, із задоволенням 🤍</option>
       <option value="no">На жаль, не зможу</option>
     </select>
-    <select name="alcohol" required>
-      <option value="">Який алкоголь ви будете пити?</option>
-      <option value="Вино">Вино 🍷</option>
-      <option value="Шампанське">Шампанське 🥂</option>
-      <option value="Горілка">Горілка</option>
-      <option value="Віскі">Віскі 🥃</option>
-      <option value="Коньяк">Коньяк</option>
-      <option value="Без алкоголю">Без алкоголю</option>
-    </select>
+    <div id="alcohol-wrapper">
+      <p style="margin: 0 0 10px; font-size: 14px; color: #666;">Який алкоголь ви будете пити? (можна декілька)</p>
+      <div class="alcohol-grid">
+        <label class="alcohol-label"><input type="checkbox" name="alcohol" value="Вино"> Вино 🍷</label>
+        <label class="alcohol-label"><input type="checkbox" name="alcohol" value="Шампанське"> Шампанське 🥂</label>
+        <label class="alcohol-label"><input type="checkbox" name="alcohol" value="Горілка"> Горілка</label>
+        <label class="alcohol-label"><input type="checkbox" name="alcohol" value="Віскі"> Віскі 🥃</label>
+        <label class="alcohol-label"><input type="checkbox" name="alcohol" value="Коньяк"> Коньяк</label>
+        <label class="alcohol-label"><input type="checkbox" name="alcohol" value="Без алкоголю"> Без алкоголю</label>
+      </div>
+    </div>
     <textarea name="wishes" placeholder="Ваші побажання"></textarea>
     <button type="submit" aria-label="Надіслати підтвердження присутності">Надіслати</button>
   </form>
@@ -790,6 +841,8 @@ button:hover{
 <!-- Lightbox для збільшення фото -->
 <div id="lightbox" class="lightbox">
   <span class="close" onclick="closeLightbox()">&times;</span>
+  <a class="prev" onclick="changeSlide(-1)">&#10094;</a>
+  <a class="next" onclick="changeSlide(1)">&#10095;</a>
   <img id="lightbox-img" alt="Збільшене фото">
 </div>
 
@@ -924,11 +977,14 @@ document.getElementById("rsvpForm").addEventListener("submit", async function(e)
 
   const name = this.querySelector("input[name='name']").value.trim();
   const attendance = this.querySelector("select[name='attendance']").value;
-  const alcohol = this.querySelector("select[name='alcohol']").value;
   const wishes = this.querySelector("textarea[name='wishes']").value.trim();
+  
+  // Збираємо всі вибрані чекбокси в один рядок
+  const alcoholChecked = this.querySelectorAll("input[name='alcohol']:checked");
+  let alcohol = Array.from(alcoholChecked).map(cb => cb.value).join(", ");
 
-  if (!name || !attendance || !alcohol) {
-    alert("Будь ласка, заповніть всі обов'язкові поля.");
+  if (!name || !attendance || (attendance === "yes" && !alcohol)) {
+    alert("Будь ласка, заповніть ім'я та виберіть напої (якщо ви будете присутні).");
     return;
   }
 
@@ -937,6 +993,8 @@ document.getElementById("rsvpForm").addEventListener("submit", async function(e)
   
   submitBtn.disabled = true;
   submitBtn.textContent = "Надсилаю...";
+
+  if (attendance === "no") alcohol = "—";
 
   const data = {
     name: name,
@@ -965,25 +1023,25 @@ document.getElementById("rsvpForm").addEventListener("submit", async function(e)
 
 // Логіка для форми: ховаємо алкоголь, якщо гість не прийде
 const attendanceSelect = document.querySelector("select[name='attendance']");
-const alcoholSelect = document.querySelector("select[name='alcohol']");
+const alcoholWrapper = document.getElementById("alcohol-wrapper");
 
 attendanceSelect.addEventListener("change", function() {
   if (this.value === "no") {
-    alcoholSelect.style.display = "none";
-    alcoholSelect.required = false;
-    alcoholSelect.value = "Без алкоголю"; // Щоб в таблиці не було пусто
+    alcoholWrapper.style.display = "none";
   } else {
-    alcoholSelect.style.display = "block";
-    alcoholSelect.required = true;
-    if (alcoholSelect.value === "Без алкоголю") alcoholSelect.value = "";
+    alcoholWrapper.style.display = "block";
   }
 });
 
 // Функції для lightbox
-function openLightbox(src) {
+let currentImageIndex = 0;
+const galleryImages = [];
+
+function openLightbox(index) {
+  currentImageIndex = index;
+  updateLightboxImage();
+  
   const lightbox = document.getElementById('lightbox');
-  const lightboxImg = document.getElementById('lightbox-img');
-  lightboxImg.src = src;
   lightbox.style.display = 'flex';
   document.body.style.overflow = 'hidden'; // Блокуємо скрол сторінки
   setTimeout(() => {
@@ -1000,42 +1058,91 @@ function closeLightbox() {
   }, 300);
 }
 
+function changeSlide(n) {
+  currentImageIndex += n;
+  if (currentImageIndex >= galleryImages.length) currentImageIndex = 0;
+  if (currentImageIndex < 0) currentImageIndex = galleryImages.length - 1;
+  updateLightboxImage();
+}
+
+function updateLightboxImage() {
+  const lightboxImg = document.getElementById('lightbox-img');
+  lightboxImg.style.opacity = 0;
+  setTimeout(() => {
+    lightboxImg.src = galleryImages[currentImageIndex];
+    lightboxImg.style.opacity = 1;
+  }, 150);
+}
+
+// Клавіатура (стрілки) та свайпи
+document.addEventListener('keydown', function(e) {
+  if (document.getElementById('lightbox').style.display === 'flex') {
+    if (e.key === 'ArrowLeft') changeSlide(-1);
+    if (e.key === 'ArrowRight') changeSlide(1);
+    if (e.key === 'Escape') closeLightbox();
+  }
+});
+
+let touchStartX = 0;
+const lightboxEl = document.getElementById('lightbox');
+
+lightboxEl.addEventListener('touchstart', e => {
+  touchStartX = e.changedTouches[0].screenX;
+});
+
+lightboxEl.addEventListener('touchend', e => {
+  const touchEndX = e.changedTouches[0].screenX;
+  if (touchEndX < touchStartX - 50) changeSlide(1); // Свайп вліво (наступне)
+  if (touchEndX > touchStartX + 50) changeSlide(-1); // Свайп вправо (попереднє)
+});
+
 // Генерація файлу для календаря (Apple/Outlook)
-function downloadICS() {
+async function downloadICS() {
   const eventData = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
+    "PRODID:-//Wedding//EN",
+    "CALSCALE:GREGORIAN",
     "BEGIN:VEVENT",
     "DTSTART:20261010T150000",
     "DTEND:20261010T230000",
     "SUMMARY:Весілля Олександра та Альони",
     "DESCRIPTION:Запрошуємо вас розділити з нами наш особливий день!",
     "LOCATION:Ресторан Сім-Сім, м. Харків",
+    "STATUS:CONFIRMED",
+    "SEQUENCE:0",
     "END:VEVENT",
     "END:VCALENDAR"
   ].join("\r\n");
 
-  // Перевіряємо, чи це iPhone/iPad
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const fileName = "wedding_invite.ics";
+  const file = new File([eventData], fileName, { type: "text/calendar" });
 
-  if (isIOS) {
-    // Для iPhone відкриваємо як посилання - це змушує Safari показати кнопку "Додати"
-    const fileUrl = "data:text/calendar;charset=utf-8," + encodeURIComponent(eventData);
-    window.location.href = fileUrl;
-  } else {
-    // Для Android та комп'ютерів - звичайне скачування файлу
-    const blob = new Blob([eventData], { type: "text/calendar;charset=utf-8" });
-    const link = document.createElement("a");
-    link.href = window.URL.createObjectURL(blob);
-    link.setAttribute("download", "wedding_invite.ics");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  // Спробуємо використати нативний шеринг (найкраще для iOS - відкриває меню "Поділитися")
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({
+        files: [file],
+        title: 'Запрошення на весілля'
+      });
+      return; // Якщо відкрилося системне меню, більше нічого не робимо
+    } catch (err) {
+      console.log('Sharing failed or canceled', err);
+    }
   }
+
+  // Fallback: звичайне скачування, якщо шеринг не підтримується
+  const blob = new Blob([eventData], { type: "text/calendar;charset=utf-8" });
+  const link = document.createElement("a");
+  link.href = window.URL.createObjectURL(blob);
+  link.setAttribute("download", fileName);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 
   // Підказка для користувача
   const toast = document.getElementById("toast");
-  toast.textContent = isIOS ? "Натисніть 'Додати' у календарі" : "Файл збережено! Відкрийте його.";
+  toast.textContent = "Файл збережено! Відкрийте його.";
   toast.className = "show";
   setTimeout(() => { 
     toast.className = toast.className.replace("show", ""); 
@@ -1067,10 +1174,11 @@ function fireConfetti(element) {
   }
 }
 
-// Додати обробники подій для всіх зображень у галереях
-document.querySelectorAll('.gallery img, .location-grid img').forEach(img => {
+// Ініціалізація галереї (збираємо всі фото)
+document.querySelectorAll('.gallery img, .location-grid img').forEach((img, index) => {
+  galleryImages.push(img.src);
   img.addEventListener('click', function() {
-    openLightbox(this.src);
+    openLightbox(index);
   });
 });
 
@@ -1115,12 +1223,15 @@ scrollBtn.addEventListener("click", () => {
   window.scrollTo({ top: 0, behavior: "smooth" });
 });
 
-// Зупинка музики при згортанні браузера
-document.addEventListener("visibilitychange", () => {
-  if (document.hidden && isPlaying) {
-    toggleMusic(); // Пауза музики та оновлення іконки
+// Покращена зупинка музики для мобільних (згортання, блокування екрану)
+function handleBackgroundMusic() {
+  if ((document.hidden || document.visibilityState === 'hidden') && isPlaying) {
+    toggleMusic();
   }
-});
+}
+
+document.addEventListener("visibilitychange", handleBackgroundMusic);
+window.addEventListener("pagehide", handleBackgroundMusic); // Додаткова перевірка для iOS/Android
 </script>
 
 </body>
