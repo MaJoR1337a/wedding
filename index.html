@@ -810,7 +810,7 @@ button:hover{
       <option value="yes">Так, із задоволенням 🤍</option>
       <option value="no">На жаль, не зможу</option>
     </select>
-    <div id="alcohol-wrapper">
+    <div id="alcohol-wrapper" style="display: none;">
       <p style="margin: 0 0 10px; font-size: 14px; color: #666;">Який алкоголь ви будете пити? (можна декілька)</p>
       <div class="alcohol-grid">
         <label class="alcohol-label"><input type="checkbox" name="alcohol" value="Вино"> Вино 🍷</label>
@@ -1027,12 +1027,20 @@ const alcoholWrapper = document.getElementById("alcohol-wrapper");
 
 attendanceSelect.addEventListener("change", function() {
   if (this.value === "no") {
-    alcoholWrapper.style.display = "none";
+    alcoholWrapper.classList.remove('visible'); // Запускаємо анімацію зникнення
+    setTimeout(() => {
+      alcoholWrapper.style.display = "none"; // Приховуємо після анімації
+      alcoholWrapper.classList.remove('fade-in'); // Прибираємо клас анімації
+    }, 800); // Час має відповідати тривалості transition у CSS (.fade-in)
   } else {
     alcoholWrapper.style.display = "block";
+    // Додаємо клас fade-in, потім visible з невеликою затримкою, щоб спрацювала анімація
+    alcoholWrapper.classList.add('fade-in');
+    setTimeout(() => {
+      alcoholWrapper.classList.add('visible');
+    }, 10); // Невелика затримка, щоб display:block застосувався до початку transition
   }
 });
-
 // Функції для lightbox
 let currentImageIndex = 0;
 const galleryImages = [];
