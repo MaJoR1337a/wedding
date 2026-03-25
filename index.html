@@ -12,6 +12,30 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Great+Vibes&family=Montserrat:wght@300;400&display=swap" as="style">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Great+Vibes&family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
 
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Event",
+  "name": "Весілля Олександра та Альони",
+  "description": "Запрошення на весілля Олександра та Альони. 10 жовтня 2026 року в Харкові.",
+  "startDate": "2026-10-10T15:00:00+03:00",
+  "endDate": "2026-10-10T21:30:00+03:00",
+  "location": {
+    "@type": "Place",
+    "name": "Ресторан Сім-Сім",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Харків",
+      "addressCountry": "UA"
+    }
+  },
+  "organizer": {
+    "@type": "Person",
+    "name": "Олександр та Альона"
+  }
+}
+</script>
+
 <style>
 :root{
   --vanilla:#ffe6d1;
@@ -181,6 +205,8 @@ section{
 
 .gallery img:hover{
   transform:scale(1.05);
+  box-shadow:0 15px 40px rgba(0,0,0,0.1), 0 0 20px rgba(114, 64, 50, 0.3);
+  filter: brightness(1.1);
 }
 
 .dress-code{
@@ -230,7 +256,7 @@ button{
   background:var(--cabernet);
   color:white;
   cursor:pointer;
-  transition:0.3s;
+  transition:0.3s all ease;
 }
 
 button:hover{
@@ -473,9 +499,6 @@ button:hover{
   }
 }
 
-.countdown-item {  /* Анімація тільки з класом animate */
-}
-
 .countdown-item.animate {  animation: bounceIn 4s ease-out;
   animation-delay: calc(var(--i) * 0.3s);
   animation-fill-mode: both;
@@ -552,7 +575,17 @@ button:hover{
 </section>
 
 <section class="fade-in">
-  <h2>📸 Our history </h2>
+  <h2>� Наша історія</h2>
+  <div class="divider"></div>
+  <p>Ми познайомилися в університеті, де обидва вивчали інформатику. Олександр завжди був тим, хто допомагав з проектами, а Альона – творчою душею, що додавала колір у життя. Перше побачення було біля річки, де ми говорили годинами. З тих пір минуло багато років, але наша любов тільки міцнішає. Ми раді розділити цей день з вами!</p>
+  <div style="display:flex; justify-content:center; gap:20px; flex-wrap:wrap; margin-top:40px;">
+    <img src="story1.jpg" alt="Перше побачення біля річки" style="width:200px; height:150px; border-radius:20px; object-fit:cover; box-shadow:0 10px 30px rgba(0,0,0,0.1);" loading="lazy">
+    <img src="story2.jpg" alt="Університетські роки" style="width:200px; height:150px; border-radius:20px; object-fit:cover; box-shadow:0 10px 30px rgba(0,0,0,0.1);" loading="lazy">
+  </div>
+</section>
+
+<section class="fade-in">
+  <h2>�📸 Our history </h2>
   <div class="divider"></div>
   <div class="gallery">
     <img src="photo1.jpg" alt="Фото з нашої історії 1" loading="lazy">
@@ -629,7 +662,7 @@ button:hover{
   <div style="text-align: center; margin-bottom: 20px;">
     <a href="https://www.instagram.com/sasha_zadorozhniy?igsh=MXZ5NHBuYXBrNDhoMA==" target="_blank" style="margin: 0 10px; color: white; text-decoration: none;">@alexander</a>
     <a href="https://www.instagram.com/alonka_dm?igsh=MTBsMmFjc3cxM2tucQ==" target="_blank" style="margin: 0 10px; color: white; text-decoration: none;">@alyona</a>
-    <span style="margin: 0 10px; color: white;">to be continued..</span>
+    <span style="margin: 0 10px; color: white;">Дякуємо за вашу підтримку 🤍</span>
   </div>
   З любов’ю, Олександр та Альона • 2026
 </footer>
@@ -671,6 +704,8 @@ function openInvite(){
     audio.muted = false;
     audio.play().catch(error => {
       console.log("Музика не запустилась:", error);
+      musicBtn.textContent = "🎵 (немає музики)";
+      musicBtn.disabled = true;
     });
     musicBtn.textContent = "🔇";
     isPlaying = true;
