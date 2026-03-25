@@ -703,9 +703,9 @@ button:hover{
   <p>10 жовтня 2026 • 15:00 • м. Харків</p>
   
   <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
-    <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Весілля+Олександра+та+Альони&dates=20261010T150000/20261010T230000&details=Запрошуємо+вас+розділити+з+нами+наш+особливий+день!&location=Ресторан+Сім-Сім,+м.+Харків" target="_blank" class="calendar-btn" style="animation: pulse 2s infinite;">
-      📅 Google Calendar
-    </a>
+    <button onclick="addToGoogleCalendar()" class="calendar-btn" style="animation: pulse 2s infinite; font-family:inherit;">
+      📅 Google / Chrome
+    </button>
     <button onclick="downloadICS()" class="calendar-btn" style="font-family:inherit;">
       🍏 Apple Calendar
     </button>
@@ -1133,6 +1133,11 @@ async function downloadICS() {
         files: [file],
         title: 'Запрошення на весілля'
       });
+      // Update toast for successful share
+      const toast = document.getElementById("toast");
+      toast.textContent = "Відкрийте меню 'Поділитися' та виберіть 'Додати в Календар'.";
+      toast.className = "show";
+      setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 4000);
       return; // Якщо відкрилося системне меню, більше нічого не робимо
     } catch (err) {
       console.log('Sharing failed or canceled', err);
@@ -1140,6 +1145,7 @@ async function downloadICS() {
   }
 
   // Fallback: звичайне скачування, якщо шеринг не підтримується
+  // Цей блок спрацює, якщо navigator.share не підтримується або не спрацював
   const blob = new Blob([eventData], { type: "text/calendar;charset=utf-8" });
   const link = document.createElement("a");
   link.href = window.URL.createObjectURL(blob);
@@ -1150,7 +1156,7 @@ async function downloadICS() {
 
   // Підказка для користувача
   const toast = document.getElementById("toast");
-  toast.textContent = "Файл збережено! Відкрийте його.";
+  toast.textContent = "Файл збережено! Відкрийте його, щоб додати подію.";
   toast.className = "show";
   setTimeout(() => { 
     toast.className = toast.className.replace("show", ""); 
