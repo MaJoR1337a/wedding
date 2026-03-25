@@ -6,6 +6,7 @@
 <meta name="description" content="Запрошення на весілля Олександра та Альони. 10 жовтня 2026 року в Харкові.">
 <meta property="og:title" content="Весілля Олександра та Альони">
 <meta property="og:description" content="Запрошуємо вас розділити з нами наш особливий день">
+<meta property="og:image" content="1.jpg">
 <meta property="og:type" content="website">
 <title>Весілля Олександра та Альони</title>
 
@@ -93,6 +94,21 @@ body::before{
   to{transform:translateY(110vh) rotate(360deg);}
 }
 
+/* Конфетті для форми */
+.confetti {
+  position: fixed;
+  width: 8px;
+  height: 8px;
+  z-index: 10002;
+  pointer-events: none;
+  animation: burst 1s ease-out forwards;
+}
+
+@keyframes burst {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+  100% { transform: translate(var(--tx), var(--ty)) rotate(720deg); opacity: 0; }
+}
+
 /* Hero — мигдальний текст без переливання */
 .hero{
   background:var(--almond);               /* фон мигдальний */
@@ -121,6 +137,123 @@ h1{
   font-size:30px;
   margin:10px 0;
   color:var(--vanilla);
+}
+
+.calendar-btn {
+  display: inline-block;
+  margin-top: 15px;
+  padding: 8px 16px;
+  border: 1px solid var(--vanilla);
+  border-radius: 20px;
+  color: var(--vanilla);
+  text-decoration: none;
+  font-size: 14px;
+  background: rgba(255, 255, 255, 0.1);
+  transition: 0.3s;
+  cursor: pointer;
+}
+
+.calendar-btn:hover {
+  background: var(--vanilla);
+  color: var(--almond);
+}
+
+/* Анімація пульсації для кнопки */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 230, 209, 0.7);
+  }
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 15px rgba(255, 230, 209, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 230, 209, 0);
+  }
+}
+
+.map-btn {
+  display: inline-block;
+  padding: 8px 16px;
+  margin: 5px;
+  background: var(--coffee);
+  color: white;
+  border-radius: 20px;
+  text-decoration: none;
+  font-size: 14px;
+  transition: 0.3s;
+}
+
+.map-btn:hover {
+  background: var(--cabernet);
+  transform: translateY(-2px);
+}
+
+/* Стилі для інтерактивної адреси та повідомлення */
+#address-text {
+  cursor: pointer;
+  transition: transform 0.2s, color 0.2s;
+  display: inline-block;
+}
+#address-text:hover {
+  transform: scale(1.05);
+  color: var(--cabernet);
+}
+#toast {
+  visibility: hidden;
+  min-width: 250px;
+  margin-left: -125px; /* Центрування */
+  background-color: var(--deep);
+  color: #fff;
+  text-align: center;
+  border-radius: 50px;
+  padding: 16px;
+  position: fixed;
+  z-index: 10001;
+  left: 50%;
+  bottom: 30px;
+  font-size: 16px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  opacity: 0;
+  transition: opacity 0.5s, bottom 0.5s;
+}
+#toast.show {
+  visibility: visible;
+  opacity: 1;
+  bottom: 50px;
+}
+
+/* Кнопка "Вгору" */
+#scrollTopBtn {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 50px;
+  height: 50px;
+  background: var(--cabernet);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  z-index: 998; /* Нижче ніж toast та lightbox */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s, visibility 0.3s, transform 0.3s, background 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#scrollTopBtn.show {
+  opacity: 1;
+  visibility: visible;
+}
+#scrollTopBtn:hover {
+  background: var(--deep);
+  transform: translateY(-5px);
 }
 
 /* решта стилів без змін */
@@ -519,13 +652,30 @@ button:hover{
   <h1>Олександр & Альона</h1>
   <p class="script">Запрошуємо вас розділити з нами наш особливий день</p>
   <p>10 жовтня 2026 • 15:00 • м. Харків</p>
+  
+  <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
+    <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Весілля+Олександра+та+Альони&dates=20261010T150000/20261010T230000&details=Запрошуємо+вас+розділити+з+нами+наш+особливий+день!&location=Ресторан+Сім-Сім,+м.+Харків" target="_blank" class="calendar-btn" style="animation: pulse 2s infinite;">
+      📅 Google Calendar
+    </a>
+    <button onclick="downloadICS()" class="calendar-btn" style="font-family:inherit;">
+      🍏 Apple / Outlook
+    </button>
+  </div>
+
   <div id="countdown"></div>
 </section>
 
 <section class="fade-in">
   <h2>📍 Локація</h2>
   <div class="divider"></div>
-  <p>Ресторан Сім-Сім, м. Харків</p>
+  <p id="address-text" onclick="copyAddress()" title="Натисніть, щоб скопіювати">Ресторан Сім-Сім, м. Харків <span style="font-size:0.8em; opacity:0.7;">📋</span></p>
+  
+  <div style="margin-bottom: 20px;">
+    <a href="https://www.google.com/maps/dir/?api=1&destination=50.015272,36.286023" target="_blank" class="map-btn">Google Maps 🗺️</a>
+    <a href="https://waze.com/ul?ll=50.015272,36.286023&navigate=yes" target="_blank" class="map-btn">Waze 🚙</a>
+    <a href="http://maps.apple.com/?daddr=50.015272,36.286023" target="_blank" class="map-btn">Apple Maps 🍏</a>
+  </div>
+
   <div style="max-width:1200px; margin:0 auto;">
     <div class="location-grid" style="display:grid; grid-template-columns:repeat(2, 1fr); gap:20px; margin-bottom:30px;">
       <img src="1.jpg" alt="Зовнішній вигляд ресторану Сім-Сім" style="width:100%; height:300px; border-radius:20px; object-fit:cover; box-shadow:0 15px 40px rgba(0,0,0,0.1);">
@@ -640,6 +790,12 @@ button:hover{
   <img id="lightbox-img" alt="Збільшене фото">
 </div>
 
+<!-- Спливаюче повідомлення про копіювання -->
+<div id="toast">Адресу скопійовано!</div>
+
+<!-- Кнопка "Вгору" -->
+<button id="scrollTopBtn" title="Вгору">↑</button>
+
 <script>
 // Музика
 let isPlaying = false;
@@ -688,6 +844,8 @@ function createPetals(){
     petal.style.left=Math.random()*100+"vw";
     petal.style.animationDuration=(5+Math.random()*5)+"s";
     document.body.appendChild(petal);
+    // Видаляємо пелюстку після завершення анімації для очищення пам'яті
+    setTimeout(() => { petal.remove(); }, 10000);
   }
 }
 
@@ -772,6 +930,8 @@ document.getElementById("rsvpForm").addEventListener("submit", async function(e)
   }
 
   const submitBtn = this.querySelector("button[type='submit']");
+  fireConfetti(submitBtn); // Запуск конфетті
+  
   submitBtn.disabled = true;
   submitBtn.textContent = "Надсилаю...";
 
@@ -800,12 +960,29 @@ document.getElementById("rsvpForm").addEventListener("submit", async function(e)
   }
 });
 
+// Логіка для форми: ховаємо алкоголь, якщо гість не прийде
+const attendanceSelect = document.querySelector("select[name='attendance']");
+const alcoholSelect = document.querySelector("select[name='alcohol']");
+
+attendanceSelect.addEventListener("change", function() {
+  if (this.value === "no") {
+    alcoholSelect.style.display = "none";
+    alcoholSelect.required = false;
+    alcoholSelect.value = "Без алкоголю"; // Щоб в таблиці не було пусто
+  } else {
+    alcoholSelect.style.display = "block";
+    alcoholSelect.required = true;
+    if (alcoholSelect.value === "Без алкоголю") alcoholSelect.value = "";
+  }
+});
+
 // Функції для lightbox
 function openLightbox(src) {
   const lightbox = document.getElementById('lightbox');
   const lightboxImg = document.getElementById('lightbox-img');
   lightboxImg.src = src;
   lightbox.style.display = 'flex';
+  document.body.style.overflow = 'hidden'; // Блокуємо скрол сторінки
   setTimeout(() => {
     lightbox.classList.add('show');
   }, 10);
@@ -814,9 +991,57 @@ function openLightbox(src) {
 function closeLightbox() {
   const lightbox = document.getElementById('lightbox');
   lightbox.classList.remove('show');
+  document.body.style.overflow = ''; // Відновлюємо скрол
   setTimeout(() => {
     lightbox.style.display = 'none';
   }, 300);
+}
+
+// Генерація файлу для календаря (Apple/Outlook)
+function downloadICS() {
+  const eventData = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "BEGIN:VEVENT",
+    "DTSTART:20261010T150000",
+    "DTEND:20261010T230000",
+    "SUMMARY:Весілля Олександра та Альони",
+    "DESCRIPTION:Запрошуємо вас розділити з нами наш особливий день!",
+    "LOCATION:Ресторан Сім-Сім, м. Харків",
+    "END:VEVENT",
+    "END:VCALENDAR"
+  ].join("\n");
+
+  const blob = new Blob([eventData], { type: "text/calendar;charset=utf-8" });
+  const link = document.createElement("a");
+  link.href = window.URL.createObjectURL(blob);
+  link.setAttribute("download", "wedding_invite.ics");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+// Функція запуску конфетті
+function fireConfetti(element) {
+  const rect = element.getBoundingClientRect();
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
+  const colors = ['#ffe6d1', '#9d806e', '#724032', '#490018', '#320010', '#ffd700'];
+
+  for (let i = 0; i < 100; i++) {
+    const confetti = document.createElement('div');
+    confetti.classList.add('confetti');
+    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+    confetti.style.left = centerX + 'px';
+    confetti.style.top = centerY + 'px';
+    
+    // Випадковий напрямок розльоту
+    confetti.style.setProperty('--tx', (Math.random() - 0.5) * 300 + 'px');
+    confetti.style.setProperty('--ty', (Math.random() - 1) * 300 + 'px'); // Більше вгору
+    
+    document.body.appendChild(confetti);
+    setTimeout(() => confetti.remove(), 1000);
+  }
 }
 
 // Додати обробники подій для всіх зображень у галереях
@@ -838,6 +1063,33 @@ const observer = new IntersectionObserver((entries) => {
 
 document.querySelectorAll('.fade-in').forEach(section => {
   observer.observe(section);
+});
+
+// Функція копіювання адреси
+function copyAddress() {
+  const text = "Ресторан Сім-Сім, м. Харків";
+  navigator.clipboard.writeText(text).then(() => {
+    const toast = document.getElementById("toast");
+    toast.className = "show";
+    setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+  }).catch(err => {
+    console.error('Failed to copy: ', err);
+  });
+}
+
+// Логіка кнопки "Вгору"
+const scrollBtn = document.getElementById("scrollTopBtn");
+
+window.addEventListener("scroll", () => {
+  if (window.scrollY > 300) {
+    scrollBtn.classList.add("show");
+  } else {
+    scrollBtn.classList.remove("show");
+  }
+});
+
+scrollBtn.addEventListener("click", () => {
+  window.scrollTo({ top: 0, behavior: "smooth" });
 });
 </script>
 
