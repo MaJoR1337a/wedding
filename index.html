@@ -3,8 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Запрошення на весілля Олександра та Альони. 10 жовтня 2026 року в Харкові.">
+<meta property="og:title" content="Весілля Олександра та Альони">
+<meta property="og:description" content="Запрошуємо вас розділити з нами наш особливий день">
+<meta property="og:type" content="website">
 <title>Весілля Олександра та Альони</title>
 
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Great+Vibes&family=Montserrat:wght@300;400&display=swap" as="style">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Great+Vibes&family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
 
 <style>
@@ -248,10 +253,9 @@ button:hover{
   z-index:1000;
 }
 
-footer{
-  padding:60px;
-  background:var(--almond);
-  color:white;
+.music-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
 }
 
 /* Lightbox для збільшення фото */
@@ -441,6 +445,59 @@ footer{
     font-size: 80px;
   }
 }
+
+/* Анімації */
+.fade-in {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.hero h1, .hero p, .hero .script {
+  animation: slideUp 1s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.countdown-item {  /* Анімація тільки з класом animate */
+}
+
+.countdown-item.animate {  animation: bounceIn 4s ease-out;
+  animation-delay: calc(var(--i) * 0.3s);
+  animation-fill-mode: both;
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
 </style>
 </head>
 
@@ -451,12 +508,12 @@ footer{
   Ваш браузер не підтримує аудіо.
 </audio>
 
-<div id="envelope" onclick="openInvite()">
+<div id="envelope" onclick="openInvite()" role="button" tabindex="0" aria-label="Натисніть, щоб відкрити запрошення">
   <div class="envelope-box"></div>
   <p>Натисніть, щоб відкрити запрошення</p>
 </div>
 
-<button class="music-btn" onclick="toggleMusic()">🎵</button>
+<button class="music-btn" onclick="toggleMusic()" aria-label="Увімкнути або вимкнути фонову музику">🎵</button>
 
 <div id="mainContent" style="display:none;">
 
@@ -467,20 +524,20 @@ footer{
   <div id="countdown"></div>
 </section>
 
-<section>
+<section class="fade-in">
   <h2>📍 Локація</h2>
   <div class="divider"></div>
   <p>Ресторан Сім-Сім, м. Харків</p>
   <div style="max-width:1200px; margin:0 auto;">
     <div class="location-grid" style="display:grid; grid-template-columns:repeat(2, 1fr); gap:20px; margin-bottom:30px;">
-      <img src="1.jpg" style="width:100%; height:300px; border-radius:20px; object-fit:cover; box-shadow:0 15px 40px rgba(0,0,0,0.1);">
-      <img src="2.jpg" style="width:100%; height:300px; border-radius:20px; object-fit:cover; box-shadow:0 15px 40px rgba(0,0,0,0.1);">
+      <img src="1.jpg" alt="Зовнішній вигляд ресторану Сім-Сім" style="width:100%; height:300px; border-radius:20px; object-fit:cover; box-shadow:0 15px 40px rgba(0,0,0,0.1);">
+      <img src="2.jpg" alt="Інтер'єр ресторану Сім-Сім" style="width:100%; height:300px; border-radius:20px; object-fit:cover; box-shadow:0 15px 40px rgba(0,0,0,0.1);">
     </div>
     <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2560.272!2d36.286023!3d50.015272!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4127a7498be85b9d%3A0xc0aa5402f02b798c!2s%D0%A1%D0%B8%D0%BC-%D0%A1%D0%B8%D0%BC!5e0!3m2!1suk!2sua!4v1740912000000!5m2!1suk!2sua" width="100%" height="300" style="border:0;border-radius:20px;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
   </div>
 </section>
 
-<section>
+<section class="fade-in">
   <h2>🕒 Таймінг</h2>
   <div class="divider"></div>
   <p>Орієнтовний розклад на день:</p>
@@ -494,20 +551,20 @@ footer{
   </ul>
 </section>
 
-<section>
+<section class="fade-in">
   <h2>📸 Our history </h2>
   <div class="divider"></div>
   <div class="gallery">
-    <img src="photo1.jpg">
-    <img src="photo2.jpg">
-    <img src="photo3.jpg">
-    <img src="photo4.jpg">
-    <img src="photo5.jpg">
-    <img src="photo6.jpg">
+    <img src="photo1.jpg" alt="Фото з нашої історії 1" loading="lazy">
+    <img src="photo2.jpg" alt="Фото з нашої історії 2" loading="lazy">
+    <img src="photo3.jpg" alt="Фото з нашої історії 3" loading="lazy">
+    <img src="photo4.jpg" alt="Фото з нашої історії 4" loading="lazy">
+    <img src="photo5.jpg" alt="Фото з нашої історії 5" loading="lazy">
+    <img src="photo6.jpg" alt="Фото з нашої історії 6" loading="lazy">
   </div>
 </section>
 
-<section class="dress-code">
+<section class="dress-code fade-in">
   <h2>Dress Code</h2>
   <div class="divider"></div>
   <p>Будемо раді бачити вас у теплих винно-карамельних відтінках.</p>
@@ -520,17 +577,17 @@ footer{
   </div>
   <p style="margin-top:40px;">Приклади стилю:</p>
   <div class="gallery" style="max-width:1000px; margin:20px auto;">
-    <img src="vanilla.png" alt="Приклад дрес-коду 1">
-    <img src="almond.png" alt="Приклад дрес-коду 2">
-    <img src="coffee.png" alt="Приклад дрес-коду 3">
-    <img src="cabernet.png" alt="Приклад дрес-коду 4">
-    <img src="Deep%20oak.png" alt="Приклад дрес-коду 5">
-    <img src="style.jpg" alt="Приклад дрес-коду 6">
+    <img src="vanilla.png" alt="Приклад дрес-коду у відтінку Vanilla" loading="lazy">
+    <img src="almond.png" alt="Приклад дрес-коду у відтінку Almond" loading="lazy">
+    <img src="coffee.png" alt="Приклад дрес-коду у відтінку Coffee" loading="lazy">
+    <img src="cabernet.png" alt="Приклад дрес-коду у відтінку Cabernet" loading="lazy">
+    <img src="Deep%20oak.png" alt="Приклад дрес-коду у відтінку Deep Oak" loading="lazy">
+    <img src="style.jpg" alt="Загальний приклад стилю дрес-коду" loading="lazy">
   </div>
   <p style="margin-top:40px;">Будь ласка, уникайте яскравих неонових кольорів 🤍</p>
 </section>
 
-<section>
+<section class="fade-in">
   <h2>🎁 Наші побажання дуже прості: </h2>
   <div class="divider"></div>
   <p>Якщо хочете зробити приємний сюрприз, ось кілька ідей:</p>
@@ -543,7 +600,7 @@ footer{
   <p style="margin-top:20px;">Дякуємо за вашу увагу та підтримку 🤍</p>
 </section>
 
-<section>
+<section class="fade-in">
   <h2>🥂 Підтвердження присутності</h2>
   <div class="divider"></div>
   <form id="rsvpForm">
@@ -563,7 +620,7 @@ footer{
       <option value="Без алкоголю">Без алкоголю</option>
     </select>
     <textarea name="wishes" placeholder="Ваші побажання"></textarea>
-    <button type="submit">Надіслати</button>
+    <button type="submit" aria-label="Надіслати підтвердження присутності">Надіслати</button>
   </form>
   <p id="thanks" style="display:none;text-align:center;margin-top:20px;color:var(--cabernet);">Дякуємо 🤍</p>
 </section>
@@ -630,6 +687,8 @@ function createPetals(){
   }
 }
 
+let countdownAnimated = false;
+
 function updateCountdown(){
   const weddingDate = new Date("2026-10-10T15:00:00").getTime();
   const now = new Date().getTime();
@@ -645,10 +704,17 @@ function updateCountdown(){
   const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
 
   document.getElementById("countdown").innerHTML = `
-    <div><span>${days}</span>днів</div>
-    <div><span>${hours}</span>годин</div>
-    <div><span>${minutes}</span>хвилин</div>
+    <div class="countdown-item" style="--i: 0;"><span>${days}</span>днів</div>
+    <div class="countdown-item" style="--i: 1;"><span>${hours}</span>годин</div>
+    <div class="countdown-item" style="--i: 2;"><span>${minutes}</span>хвилин</div>
   `;
+
+  // Анімація тільки при першому завантаженні
+  if (!countdownAnimated) {
+    const items = document.querySelectorAll('.countdown-item');
+    items.forEach(item => item.classList.add('animate'));
+    countdownAnimated = true;
+  }
 }
 
 setInterval(updateCountdown,1000);
@@ -682,10 +748,19 @@ if (window.innerWidth > 768) {
 document.getElementById("rsvpForm").addEventListener("submit", async function(e){
   e.preventDefault();
 
-  const name = this.querySelector("input[name='name']").value;
+  const name = this.querySelector("input[name='name']").value.trim();
   const attendance = this.querySelector("select[name='attendance']").value;
   const alcohol = this.querySelector("select[name='alcohol']").value;
-  const wishes = this.querySelector("textarea[name='wishes']").value;
+  const wishes = this.querySelector("textarea[name='wishes']").value.trim();
+
+  if (!name || !attendance || !alcohol) {
+    alert("Будь ласка, заповніть всі обов'язкові поля.");
+    return;
+  }
+
+  const submitBtn = this.querySelector("button[type='submit']");
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Надсилаю...";
 
   const data = {
     name: name,
@@ -702,9 +777,13 @@ document.getElementById("rsvpForm").addEventListener("submit", async function(e)
 
     document.getElementById("thanks").style.display="block";
     this.reset();
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Надіслати";
   } catch (error) {
     alert("Помилка відправки 😢");
     console.log("Помилка:", error);
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Надіслати";
   }
 });
 
@@ -732,6 +811,20 @@ document.querySelectorAll('.gallery img, .location-grid img').forEach(img => {
   img.addEventListener('click', function() {
     openLightbox(this.src);
   });
+});
+
+// Анімація появи секцій при скроллі
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      observer.unobserve(entry.target); // Анімація тільки один раз
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.fade-in').forEach(section => {
+  observer.observe(section);
 });
 </script>
 
