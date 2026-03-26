@@ -1179,8 +1179,8 @@ async function downloadICS() {
     "PRODID:-//Wedding//EN",
     "CALSCALE:GREGORIAN",
     "BEGIN:VEVENT",
-    "DTSTART:20261010T150000",
-    "DTEND:20261010T230000",
+    "DTSTART:20261010T120000Z",
+    "DTEND:20261010T200000Z",
     "SUMMARY:Весілля Олександра та Альони",
     "DESCRIPTION:Запрошуємо вас розділити з нами наш особливий день!",
     "LOCATION:Ресторан Сім-Сім, м. Харків",
@@ -1191,35 +1191,37 @@ async function downloadICS() {
   ].join("\r\n");
 
   const fileName = "wedding_invite.ics";
-  const file = new File([eventData], fileName, { type: "text/calendar" });
+  const mimeType = "text/calendar;charset=utf-8";
 
-  // Спробуємо використати нативний шеринг (найкраще для iOS - відкриває меню "Поділитися")
-  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+  // Перевірка на Chrome на iOS (CriOS)
+  const isIOSChrome = /CriOS/i.test(navigator.userAgent);
+
+  // 1. Спробуємо нативний шеринг (ідеально для Safari iOS)
+  if (!isIOSChrome && navigator.share && navigator.canShare) {
+    const file = new File([eventData], fileName, { type: mimeType });
     try {
-      await navigator.share({
-        files: [file],
-        title: 'Запрошення на весілля'
-      });
-      // Update toast for successful share
-      const toast = document.getElementById("toast");
-      toast.textContent = "Відкрийте меню 'Поділитися' та виберіть 'Додати в Календар'.";
-      toast.className = "show";
-      setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 4000);
-      return; // Якщо відкрилося системне меню, більше нічого не робимо
+      if (navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'Запрошення на весілля' });
+        return;
+      }
     } catch (err) {
       console.log('Sharing failed or canceled', err);
     }
   }
 
-  // Fallback: звичайне скачування, якщо шеринг не підтримується
-  // Цей блок спрацює, якщо navigator.share не підтримується або не спрацював
-  const blob = new Blob([eventData], { type: "text/calendar;charset=utf-8" });
-  const link = document.createElement("a");
-  link.href = window.URL.createObjectURL(blob);
-  link.setAttribute("download", fileName);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+  // 2. Fallback: Для Chrome iOS та інших браузерів
+  if (isIOSChrome) {
+    // Chrome на iOS найкраще сприймає Data URI для таких файлів
+    window.location.href = "data:" + mimeType + "," + encodeURIComponent(eventData);
+  } else {
+    const blob = new Blob([eventData], { type: mimeType });
+    const link = document.createElement("a");
+    link.href = window.URL.createObjectURL(blob);
+    link.setAttribute("download", fileName);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
 
   // Підказка для користувача
   const toast = document.getElementById("toast");
