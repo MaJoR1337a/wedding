@@ -902,14 +902,15 @@ const musicBtn = document.querySelector(".music-btn");
 function toggleMusic() {
   if (isPlaying) {
     audio.pause();
-    musicBtn.textContent = "🎵";
     isPlaying = false;
+    musicBtn.textContent = "🎵";
   } else {
-    const playPromise = audio.play();
-    if (playPromise !== undefined) {
-      playPromise.then(() => {
-        musicBtn.textContent = "🔇";
+    audio.muted = false;
+    const promise = audio.play();
+    if (promise !== undefined) {
+      promise.then(() => {
         isPlaying = true;
+        musicBtn.textContent = "🔇";
       }).catch(error => {
         console.log("Помилка:", error);
       });
@@ -924,15 +925,10 @@ function openInvite(){
     document.getElementById("mainContent").style.display="block";
     createPetals();
     // Включаем музику после открытия
-    const audio = document.getElementById("bgMusic");
     audio.muted = false;
     audio.play().then(() => {
       isPlaying = true;
       musicBtn.textContent = "🔇";
-    }).catch(error => {
-      console.log("Музика не запустилась:", error);
-      musicBtn.textContent = "🎵 (немає музики)";
-      musicBtn.disabled = true;
     });
     
     // Підказка про звук
@@ -1191,36 +1187,40 @@ async function downloadICS() {
   ].join("\r\n");
 
   const fileName = "wedding_invite.ics";
-  const mimeType = "text/calendar;charset=utf-8";
+  const isChromeIOS = /CriOS/i.test(navigator.userAgent);
 
-  // Перевірка на Chrome на iOS (CriOS)
-  const isIOSChrome = /CriOS/i.test(navigator.userAgent);
-
-  // 1. Спробуємо нативний шеринг (ідеально для Safari iOS)
-  if (!isIOSChrome && navigator.share && navigator.canShare) {
-    const file = new File([eventData], fileName, { type: mimeType });
+  // 1. Спроба через нативний шеринг (найкраще для Safari на iOS та Android Chrome)
+  if (!isChromeIOS && navigator.share) {
     try {
+      const file = new File([eventData], fileName, { type: "text/calendar" });
       if (navigator.canShare({ files: [file] })) {
         await navigator.share({ files: [file], title: 'Запрошення на весілля' });
         return;
       }
     } catch (err) {
-      console.log('Sharing failed or canceled', err);
+      console.error('Sharing failed', err);
     }
   }
 
-  // 2. Fallback: Для Chrome iOS та інших браузерів
-  if (isIOSChrome) {
-    // Chrome на iOS найкраще сприймає Data URI для таких файлів
-    window.location.href = "data:" + mimeType + "," + encodeURIComponent(eventData);
+  // 2. Метод для Chrome на iOS та інших (Base64)
+  // Використовуємо application/octet-stream, щоб змусити Chrome iOS запропонувати "Відкрити в..."
+  const base64Data = btoa(unescape(encodeURIComponent(eventData)));
+  const dataUri = `data:application/octet-stream;base64,${base64Data}`;
+  
+  if (isChromeIOS) {
+    window.location.href = dataUri;
   } else {
-    const blob = new Blob([eventData], { type: mimeType });
+    const blob = new Blob([eventData], { type: "text/calendar" });
     const link = document.createElement("a");
-    link.href = window.URL.createObjectURL(blob);
+    if (window.URL) {
+      link.href = window.URL.createObjectURL(blob);
+    } else {
+      link.href = dataUri;
+    }
     link.setAttribute("download", fileName);
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
+    setTimeout(() => document.body.removeChild(link), 100);
   }
 
   // Підказка для користувача
