@@ -10,6 +10,7 @@
 <meta property="og:type" content="website">
 <title>Весілля Олександра та Альони</title>
 
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💍</text></svg>">
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Great+Vibes&family=Montserrat:wght@300;400&display=swap" as="style">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Great+Vibes&family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
 
@@ -29,6 +30,18 @@ body{
   color:var(--almond);
   overflow-x:hidden;
   scroll-behavior:smooth;
+}
+
+/* Підтримка темної теми */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --vanilla: #1a1a1a;
+    --almond: #d4b8a5;
+  }
+  body { background-color: #121212; color: #e0e0e0; }
+  #envelope { background-color: #1a1a1a; }
+  #countdown div { background: #252525; color: #d4b8a5; }
+  .alcohol-label, input, select, textarea { background: #2c2c2c; color: white; border-color: #444; }
 }
 
 /* Легка текстура */
@@ -378,6 +391,16 @@ input,select,textarea{
   border-color: var(--cabernet);
   background: #fff5f0;
 }
+.alcohol-wrapper-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s ease-out, opacity 0.5s;
+  opacity: 0;
+}
+.alcohol-wrapper-content.show {
+  max-height: 500px;
+  opacity: 1;
+}
 .alcohol-label input {
   width: auto;
   margin: 0 10px 0 0;
@@ -703,7 +726,7 @@ button:hover{
   <p>10 жовтня 2026 • 15:00 • м. Харків</p>
   
   <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
-    <button onclick="addToGoogleCalendar()" class="calendar-btn" style="animation: pulse 2s infinite; font-family:inherit;">
+    <button onclick="openGoogleCalendar()" class="calendar-btn" style="animation: pulse 2s infinite; font-family:inherit;">
       📅 Google / Chrome
     </button>
     <button onclick="downloadICS()" class="calendar-btn" style="font-family:inherit;">
@@ -730,37 +753,55 @@ button:hover{
 
   <div style="max-width:1200px; margin:0 auto;">
     <div class="location-grid" style="display:grid; grid-template-columns:repeat(2, 1fr); gap:20px; margin-bottom:30px;">
-      <img src="1.jpg" alt="Зовнішній вигляд ресторану Сім-Сім" style="width:100%; height:300px; border-radius:20px; object-fit:cover; box-shadow:0 15px 40px rgba(0,0,0,0.1);">
-      <img src="2.jpg" alt="Інтер'єр ресторану Сім-Сім" style="width:100%; height:300px; border-radius:20px; object-fit:cover; box-shadow:0 15px 40px rgba(0,0,0,0.1);">
+      <img src="1.jpg" class="view-img" alt="Зовнішній вигляд ресторану Сім-Сім" style="width:100%; height:300px; border-radius:20px; object-fit:cover; box-shadow:0 15px 40px rgba(0,0,0,0.1);">
+      <img src="2.jpg" class="view-img" alt="Інтер'єр ресторану Сім-Сім" style="width:100%; height:300px; border-radius:20px; object-fit:cover; box-shadow:0 15px 40px rgba(0,0,0,0.1);">
     </div>
     <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2560.272!2d36.286023!3d50.015272!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4127a7498be85b9d%3A0xc0aa5402f02b798c!2s%D0%A1%D0%B8%D0%BC-%D0%A1%D0%B8%D0%BC!5e0!3m2!1suk!2sua!4v1740912000000!5m2!1suk!2sua" width="100%" height="300" style="border:0;border-radius:20px;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
   </div>
 </section>
 
-<section class="fade-in">
+<section class="fade-in" id="timing-section">
   <h2>🕒 Таймінг</h2>
   <div class="divider"></div>
   <p>Орієнтовний розклад на день:</p>
-  <ul style="list-style:none; padding:0; max-width:500px; margin:0 auto; text-align:left;">
-    <li style="margin: 10px 0;"><strong>13:30</strong> — Прийом гостей / фуршет</li>
-    <li style="margin: 10px 0;"><strong>14:00</strong> — Початок церемонії</li>
-    <li style="margin: 10px 0;"><strong>17:30</strong> — Фотосесія</li>
-    <li style="margin: 10px 0;"><strong>18:30</strong> — Вечеря</li>
-    <li style="margin: 10px 0;"><strong>20:00</strong> — Танці та святкування</li>
-    <li style="margin: 10px 0;"><strong>21:30</strong> — Завершення святкування</li>
+  <ul class="timing-list" style="list-style:none; padding:0; max-width:500px; margin:0 auto; text-align:left;">
+    <li class="stagger-item" style="margin: 10px 0;"><strong>13:30</strong> — Прийом гостей / фуршет</li>
+    <li class="stagger-item" style="margin: 10px 0;"><strong>14:00</strong> — Початок церемонії</li>
+    <li class="stagger-item" style="margin: 10px 0;"><strong>17:30</strong> — Фотосесія</li>
+    <li class="stagger-item" style="margin: 10px 0;"><strong>18:30</strong> — Вечеря</li>
+    <li class="stagger-item" style="margin: 10px 0;"><strong>20:00</strong> — Танці та святкування</li>
+    <li class="stagger-item" style="margin: 10px 0;"><strong>21:30</strong> — Завершення святкування</li>
   </ul>
 </section>
+
+<style>
+.stagger-item {
+  opacity: 0;
+  transform: translateX(-20px);
+  transition: all 0.5s ease-out;
+}
+.visible .stagger-item {
+  opacity: 1;
+  transform: translateX(0);
+}
+.stagger-item:nth-child(1) { transition-delay: 0.1s; }
+.stagger-item:nth-child(2) { transition-delay: 0.2s; }
+.stagger-item:nth-child(3) { transition-delay: 0.3s; }
+.stagger-item:nth-child(4) { transition-delay: 0.4s; }
+.stagger-item:nth-child(5) { transition-delay: 0.5s; }
+.stagger-item:nth-child(6) { transition-delay: 0.6s; }
+</style>
 
 <section class="fade-in">
   <h2> 📷 Our history </h2>
   <div class="divider"></div>
-  <div class="gallery">
-    <img src="photo1.jpg" alt="Фото з нашої історії 1" loading="lazy">
-    <img src="photo2.jpg" alt="Фото з нашої історії 2" loading="lazy">
-    <img src="photo3.jpg" alt="Фото з нашої історії 3" loading="lazy">
-    <img src="photo4.jpg" alt="Фото з нашої історії 4" loading="lazy">
-    <img src="photo5.jpg" alt="Фото з нашої історії 5" loading="lazy">
-    <img src="photo6.jpg" alt="Фото з нашої історії 6" loading="lazy">
+  <div class="gallery history-gallery">
+    <img src="photo1.jpg" class="view-img" alt="Фото з нашої історії 1" loading="lazy">
+    <img src="photo2.jpg" class="view-img" alt="Фото з нашої історії 2" loading="lazy">
+    <img src="photo3.jpg" class="view-img" alt="Фото з нашої історії 3" loading="lazy">
+    <img src="photo4.jpg" class="view-img" alt="Фото з нашої історії 4" loading="lazy">
+    <img src="photo5.jpg" class="view-img" alt="Фото з нашої історії 5" loading="lazy">
+    <img src="photo6.jpg" class="view-img" alt="Фото з нашої історії 6" loading="lazy">
   </div>
 </section>
 
@@ -777,12 +818,12 @@ button:hover{
   </div>
   <p style="margin-top:40px;">Приклади стилю:</p>
   <div class="gallery" style="max-width:1000px; margin:20px auto;">
-    <img src="vanilla.png" alt="Приклад дрес-коду у відтінку Vanilla" loading="lazy">
-    <img src="almond.png" alt="Приклад дрес-коду у відтінку Almond" loading="lazy">
-    <img src="coffee.png" alt="Приклад дрес-коду у відтінку Coffee" loading="lazy">
-    <img src="cabernet.png" alt="Приклад дрес-коду у відтінку Cabernet" loading="lazy">
-    <img src="Deep%20oak.png" alt="Приклад дрес-коду у відтінку Deep Oak" loading="lazy">
-    <img src="style.jpg" alt="Загальний приклад стилю дрес-коду" loading="lazy">
+    <img src="vanilla.png" class="style-img" alt="Приклад дрес-коду у відтінку Vanilla" loading="lazy">
+    <img src="almond.png" class="style-img" alt="Приклад дрес-коду у відтінку Almond" loading="lazy">
+    <img src="coffee.png" class="style-img" alt="Приклад дрес-коду у відтінку Coffee" loading="lazy">
+    <img src="cabernet.png" class="style-img" alt="Приклад дрес-коду у відтінку Cabernet" loading="lazy">
+    <img src="Deep%20oak.png" class="style-img" alt="Приклад дрес-коду у відтінку Deep Oak" loading="lazy">
+    <img src="style.jpg" class="style-img" alt="Загальний приклад стилю дрес-коду" loading="lazy">
   </div>
   <p style="margin-top:40px;">Будь ласка, уникайте яскравих неонових кольорів 🤍</p>
 </section>
@@ -810,7 +851,7 @@ button:hover{
       <option value="yes">Так, із задоволенням 🤍</option>
       <option value="no">На жаль, не зможу</option>
     </select>
-    <div id="alcohol-wrapper" style="display: none;">
+    <div id="alcohol-wrapper" class="alcohol-wrapper-content">
       <p style="margin: 0 0 10px; font-size: 14px; color: #666;">Який алкоголь ви будете пити? (можна декілька)</p>
       <div class="alcohol-grid">
         <label class="alcohol-label"><input type="checkbox" name="alcohol" value="Вино"> Вино 🍷</label>
@@ -885,11 +926,22 @@ function openInvite(){
     // Включаем музику после открытия
     const audio = document.getElementById("bgMusic");
     audio.muted = false;
-    audio.play().catch(error => {
+    audio.play().then(() => {
+      isPlaying = true;
+      musicBtn.textContent = "🔇";
+    }).catch(error => {
       console.log("Музика не запустилась:", error);
       musicBtn.textContent = "🎵 (немає музики)";
       musicBtn.disabled = true;
     });
+    
+    // Підказка про звук
+    setTimeout(() => {
+      const toast = document.getElementById("toast");
+      toast.textContent = "Натисніть 🎵, якщо не чуєте музику";
+      toast.className = "show";
+      setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 4000);
+    }, 2000);
   },800);
 } 
 
@@ -981,12 +1033,18 @@ document.getElementById("rsvpForm").addEventListener("submit", async function(e)
   
   // Збираємо всі вибрані чекбокси в один рядок
   const alcoholChecked = this.querySelectorAll("input[name='alcohol']:checked");
-  let alcohol = Array.from(alcoholChecked).map(cb => cb.value).join(", ");
-
-  if (!name || !attendance || (attendance === "yes" && !alcohol)) {
-    alert("Будь ласка, заповніть ім'я та виберіть напої (якщо ви будете присутні).");
+  
+  if (!name || !attendance) {
+    alert("Будь ласка, заповніть обов'язкові поля.");
     return;
   }
+  
+  if (attendance === "yes" && alcoholChecked.length === 0) {
+    alert("Будь ласка, оберіть хоча б один напій (можна 'Без алкоголю') 🥂");
+    return;
+  }
+
+  let alcohol = Array.from(alcoholChecked).map(cb => cb.value).join(", ");
 
   const submitBtn = this.querySelector("button[type='submit']");
   fireConfetti(submitBtn); // Запуск конфетті
@@ -1027,25 +1085,34 @@ const alcoholWrapper = document.getElementById("alcohol-wrapper");
 
 attendanceSelect.addEventListener("change", function() {
   if (this.value === "no") {
-    alcoholWrapper.classList.remove('visible'); // Запускаємо анімацію зникнення
+    alcoholWrapper.classList.remove('show');
     setTimeout(() => {
-      alcoholWrapper.style.display = "none"; // Приховуємо після анімації
-      alcoholWrapper.classList.remove('fade-in'); // Прибираємо клас анімації
-    }, 800); // Час має відповідати тривалості transition у CSS (.fade-in)
+      if(this.value === "no") alcoholWrapper.style.display = "none";
+    }, 500); 
   } else {
     alcoholWrapper.style.display = "block";
-    // Додаємо клас fade-in, потім visible з невеликою затримкою, щоб спрацювала анімація
-    alcoholWrapper.classList.add('fade-in');
     setTimeout(() => {
-      alcoholWrapper.classList.add('visible');
+      alcoholWrapper.classList.add('show');
     }, 10); // Невелика затримка, щоб display:block застосувався до початку transition
   }
 });
+
+// Функція для Google Календаря
+function openGoogleCalendar() {
+  const baseUrl = "https://www.google.com/calendar/render?action=TEMPLATE";
+  const text = encodeURIComponent("Весілля Олександра та Альони");
+  const dates = "20261010T120000Z/20261010T200000Z";
+  const details = encodeURIComponent("Запрошуємо вас розділити з нами наш особливий день!");
+  const location = encodeURIComponent("Ресторан Сім-Сім, м. Харків");
+  window.open(`${baseUrl}&text=${text}&dates=${dates}&details=${details}&location=${location}`, '_blank');
+}
+
 // Функції для lightbox
 let currentImageIndex = 0;
-const galleryImages = [];
+let currentGalleryImages = [];
 
-function openLightbox(index) {
+function openLightbox(index, imagesArray) {
+  currentGalleryImages = imagesArray;
   currentImageIndex = index;
   updateLightboxImage();
   
@@ -1068,8 +1135,8 @@ function closeLightbox() {
 
 function changeSlide(n) {
   currentImageIndex += n;
-  if (currentImageIndex >= galleryImages.length) currentImageIndex = 0;
-  if (currentImageIndex < 0) currentImageIndex = galleryImages.length - 1;
+  if (currentImageIndex >= currentGalleryImages.length) currentImageIndex = 0;
+  if (currentImageIndex < 0) currentImageIndex = currentGalleryImages.length - 1;
   updateLightboxImage();
 }
 
@@ -1077,7 +1144,7 @@ function updateLightboxImage() {
   const lightboxImg = document.getElementById('lightbox-img');
   lightboxImg.style.opacity = 0;
   setTimeout(() => {
-    lightboxImg.src = galleryImages[currentImageIndex];
+    lightboxImg.src = currentGalleryImages[currentImageIndex];
     lightboxImg.style.opacity = 1;
   }, 150);
 }
@@ -1189,11 +1256,13 @@ function fireConfetti(element) {
 }
 
 // Ініціалізація галереї (збираємо всі фото)
-document.querySelectorAll('.gallery img, .location-grid img').forEach((img, index) => {
-  galleryImages.push(img.src);
-  img.addEventListener('click', function() {
-    openLightbox(index);
-  });
+document.querySelectorAll('.gallery, .location-grid').forEach((galleryContainer) => {
+    const imgs = Array.from(galleryContainer.querySelectorAll('img.view-img, img.style-img'));
+    const srcArray = imgs.map(img => img.src);
+    
+    imgs.forEach((img, index) => {
+        img.addEventListener('click', () => openLightbox(index, srcArray));
+    });
 });
 
 // Анімація появи секцій при скроллі
@@ -1239,8 +1308,10 @@ scrollBtn.addEventListener("click", () => {
 
 // Покращена зупинка музики для мобільних (згортання, блокування екрану)
 function handleBackgroundMusic() {
-  if ((document.hidden || document.visibilityState === 'hidden') && isPlaying) {
-    toggleMusic();
+  if (document.hidden || document.visibilityState === 'hidden') {
+    audio.pause();
+  } else if (isPlaying) {
+    audio.play();
   }
 }
 
