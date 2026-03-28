@@ -703,9 +703,9 @@ button:hover{
   <p>10 жовтня 2026 • 15:00 • м. Харків</p>
   
   <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
-    <button onclick="addToGoogleCalendar()" class="calendar-btn" style="animation: pulse 2s infinite; font-family:inherit;">
-      📅 Google / Chrome
-    </button>
+    <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Весілля+Олександра+та+Альони&dates=20261010T150000/20261010T230000&details=Запрошуємо+вас+розділити+з+нами+наш+особливий+день!&location=Ресторан+Сім-Сім,+м.+Харків" target="_blank" class="calendar-btn" style="animation: pulse 2s infinite;">
+      📅 Google Calendar
+    </a>
     <button onclick="downloadICS()" class="calendar-btn" style="font-family:inherit;">
       🍏 Apple Calendar
     </button>
@@ -810,7 +810,7 @@ button:hover{
       <option value="yes">Так, із задоволенням 🤍</option>
       <option value="no">На жаль, не зможу</option>
     </select>
-    <div id="alcohol-wrapper" style="display: none;">
+    <div id="alcohol-wrapper">
       <p style="margin: 0 0 10px; font-size: 14px; color: #666;">Який алкоголь ви будете пити? (можна декілька)</p>
       <div class="alcohol-grid">
         <label class="alcohol-label"><input type="checkbox" name="alcohol" value="Вино"> Вино 🍷</label>
@@ -1027,20 +1027,34 @@ const alcoholWrapper = document.getElementById("alcohol-wrapper");
 
 attendanceSelect.addEventListener("change", function() {
   if (this.value === "no") {
-    alcoholWrapper.classList.remove('visible'); // Запускаємо анімацію зникнення
-    setTimeout(() => {
-      alcoholWrapper.style.display = "none"; // Приховуємо після анімації
-      alcoholWrapper.classList.remove('fade-in'); // Прибираємо клас анімації
-    }, 800); // Час має відповідати тривалості transition у CSS (.fade-in)
+    alcoholWrapper.style.display = "none";
   } else {
     alcoholWrapper.style.display = "block";
-    // Додаємо клас fade-in, потім visible з невеликою затримкою, щоб спрацювала анімація
-    alcoholWrapper.classList.add('fade-in');
-    setTimeout(() => {
-      alcoholWrapper.classList.add('visible');
-    }, 10); // Невелика затримка, щоб display:block застосувався до початку transition
   }
 });
+
+// Функція для перевірки валідності та запуску пульсації кнопки
+function updateSubmitButtonAnimation() {
+  const form = document.getElementById("rsvpForm");
+  const name = form.querySelector("input[name='name']").value.trim();
+  const attendance = form.querySelector("select[name='attendance']").value;
+  const alcoholSelected = form.querySelectorAll("input[name='alcohol']:checked").length > 0;
+  const submitBtn = form.querySelector("button[type='submit']");
+
+  const isNameValid = name.length >= 2;
+  const isAttendanceValid = attendance !== "";
+  const isAlcoholValid = (attendance === "no") || (attendance === "yes" && alcoholSelected);
+
+  if (isNameValid && isAttendanceValid && isAlcoholValid) {
+    submitBtn.style.animation = "pulse 2s infinite";
+  } else {
+    submitBtn.style.animation = "none";
+  }
+}
+
+// Слухач для оновлення анімації при будь-якій зміні у формі
+document.getElementById("rsvpForm").addEventListener("input", updateSubmitButtonAnimation);
+
 // Функції для lightbox
 let currentImageIndex = 0;
 const galleryImages = [];
@@ -1133,11 +1147,6 @@ async function downloadICS() {
         files: [file],
         title: 'Запрошення на весілля'
       });
-      // Update toast for successful share
-      const toast = document.getElementById("toast");
-      toast.textContent = "Відкрийте меню 'Поділитися' та виберіть 'Додати в Календар'.";
-      toast.className = "show";
-      setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 4000);
       return; // Якщо відкрилося системне меню, більше нічого не робимо
     } catch (err) {
       console.log('Sharing failed or canceled', err);
@@ -1145,7 +1154,6 @@ async function downloadICS() {
   }
 
   // Fallback: звичайне скачування, якщо шеринг не підтримується
-  // Цей блок спрацює, якщо navigator.share не підтримується або не спрацював
   const blob = new Blob([eventData], { type: "text/calendar;charset=utf-8" });
   const link = document.createElement("a");
   link.href = window.URL.createObjectURL(blob);
@@ -1156,7 +1164,7 @@ async function downloadICS() {
 
   // Підказка для користувача
   const toast = document.getElementById("toast");
-  toast.textContent = "Файл збережено! Відкрийте його, щоб додати подію.";
+  toast.textContent = "Файл збережено! Відкрийте його.";
   toast.className = "show";
   setTimeout(() => { 
     toast.className = toast.className.replace("show", ""); 
