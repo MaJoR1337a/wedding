@@ -63,26 +63,119 @@ body::before{
   justify-content:center;
   align-items:center;
   flex-direction:column;
-  z-index:9999;
+  z-index:10005;
   cursor:pointer;
-  transition:1s;
+  transition: opacity 1s ease;
+  perspective: 1000px;
 }
 
 .envelope-box{
   width:320px;
   height:200px;
   background:var(--cabernet);
-  border-radius:6px;
+  border-radius:0 0 6px 6px;
   position:relative;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  animation: sway 4s ease-in-out infinite;
 }
 
-.envelope-box:before{
+/* Верхній клапан конверта */
+.envelope-flap {
   content:"";
   position:absolute;
+  top: 0;
+  left: 0;
   width:100%;
   height:100%;
   background:var(--deep);
   clip-path:polygon(0 0,100% 0,50% 50%);
+  transition: transform 0.8s ease;
+  transform-origin: top;
+  z-index: 2;
+}
+
+/* Печатка */
+.wax-seal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -20%);
+  width: 60px;
+  height: 60px;
+  background: radial-gradient(circle at 30% 30%, #ffeb3b, #d4af37, #8b6b23);
+  border-radius: 50% 48% 52% 47% / 47% 53% 48% 52%; /* Нерівна форма справжнього воску */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Great Vibes', cursive;
+  font-size: 20px;
+  font-weight: bold;
+  color: #490018; /* Колір Cabernet для ефекту відтиску */
+  text-shadow: 0.5px 0.5px 0px rgba(255,255,255,0.3);
+  box-shadow: 
+    inset 0 0 12px rgba(0,0,0,0.3),
+    0 6px 15px rgba(0,0,0,0.4);
+  z-index: 3;
+  transition: opacity 0.4s ease;
+  animation: sealPulse 2s infinite ease-in-out;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+@keyframes sealPulse {
+  0% { transform: translate(-50%, -20%) scale(1); box-shadow: inset 0 0 12px rgba(0,0,0,0.3), 0 6px 15px rgba(0,0,0,0.4); }
+  50% { 
+    transform: translate(-50%, -20%) scale(1.1); 
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.5), 0 10px 30px rgba(0,0,0,0.4); 
+  }
+  100% { transform: translate(-50%, -20%) scale(1); box-shadow: inset 0 0 12px rgba(0,0,0,0.3), 0 6px 15px rgba(0,0,0,0.4); }
+}
+
+@keyframes sway {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(1.5deg); }
+  75% { transform: rotate(-1.5deg); }
+}
+
+#envelope.open .envelope-flap {
+  transform: rotateX(180deg);
+}
+
+#envelope.open .wax-seal {
+  opacity: 0;
+  animation: none;
+}
+
+#envelope.open .envelope-box {
+  animation: none;
+}
+
+/* Лист всередині конверта */
+.letter {
+  position: absolute;
+  top: 5px;
+  left: 10px;
+  right: 10px;
+  bottom: 5px;
+  background: white;
+  border-radius: 4px;
+  z-index: 1;
+  transition: transform 1s ease-in-out, opacity 0.5s;
+  opacity: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 15px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.2);
+  color: var(--cabernet);
+  font-family: 'Great Vibes', cursive;
+  font-size: 22px;
+  text-align: center;
+}
+
+#envelope.open .letter {
+  opacity: 1;
+  transform: translateY(-140px) scale(1.05);
 }
 
 #envelope p{
@@ -712,7 +805,11 @@ button:hover{
 </audio>
 
 <div id="envelope" onclick="openInvite()" role="button" tabindex="0" aria-label="Натисніть, щоб відкрити запрошення">
-  <div class="envelope-box"></div>
+  <div class="envelope-box">
+    <div class="envelope-flap"></div>
+    <div class="wax-seal">О&А</div>
+    <div class="letter">Запрошуємо вас! <br> <span style="font-size: 0.6em; font-family: 'Montserrat';">10.10.2026</span></div>
+  </div>
   <p>Натисніть, щоб відкрити запрошення</p>
 </div>
 
@@ -725,6 +822,7 @@ button:hover{
   <p class="script">Запрошуємо вас розділити з нами наш особливий день</p>
   <p>10 жовтня 2026 • 15:00 • м. Харків</p>
   
+  <!-- Тимчасово приховано блок з календарями
   <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
     <button onclick="openGoogleCalendar()" class="calendar-btn" style="animation: pulse 2s infinite; font-family:inherit;">
       📅 Google / Chrome
@@ -736,6 +834,7 @@ button:hover{
       📧 Outlook
     </a>
   </div>
+  -->
 
   <div id="countdown"></div>
 </section>
@@ -919,8 +1018,12 @@ function toggleMusic() {
 }
 
 function openInvite(){
-  document.getElementById("envelope").style.opacity="0";
+  const env = document.getElementById("envelope");
+  env.classList.add("open"); // Запускаємо анімацію клапана
+  
   setTimeout(()=>{
+    env.style.opacity="0";
+    setTimeout(()=>{
     document.getElementById("envelope").style.display="none";
     document.getElementById("mainContent").style.display="block";
     createPetals();
@@ -938,7 +1041,8 @@ function openInvite(){
       toast.className = "show";
       setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 4000);
     }, 2000);
-  },800);
+    }, 1200); // Час на розчинення всього конверта
+  }, 1400); // Затримка, щоб дати листу "вилетіти" перед зникненням
 } 
 
 function createPetals(){
