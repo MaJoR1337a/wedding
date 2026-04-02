@@ -394,6 +394,7 @@ section{
   color:var(--almond);
 }
 
+
 #countdown span{
   display:block;
   font-size:28px;
@@ -1019,30 +1020,37 @@ function toggleMusic() {
 
 function openInvite(){
   const env = document.getElementById("envelope");
-  env.classList.add("open"); // Запускаємо анімацію клапана
+  const main = document.getElementById("mainContent");
   
-  setTimeout(()=>{
-    env.style.opacity="0";
-    setTimeout(()=>{
-    document.getElementById("envelope").style.display="none";
-    document.getElementById("mainContent").style.display="block";
-    createPetals();
-    // Включаем музику после открытия
-    audio.muted = false;
-    audio.play().then(() => {
-      isPlaying = true;
-      musicBtn.textContent = "🔇";
-    });
-    
-    // Підказка про звук
+  if (env.classList.contains("open")) return; // Запобігаємо повторному натисканню
+
+  env.classList.add("open"); // Запускаємо анімацію клапана
+  env.style.pointerEvents = "none"; // Вимикаємо кліки по конверту
+  
+  // Починаємо робити конверт прозорим раніше, щоб бачити контент під ним
+  setTimeout(() => {
+    env.style.opacity = "0";
+    main.style.display = "block"; // Сайт з'являється "під" напівпрозорим конвертом
+
     setTimeout(() => {
-      const toast = document.getElementById("toast");
-      toast.textContent = "Натисніть 🎵, якщо не чуєте музику";
-      toast.className = "show";
-      setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 4000);
-    }, 2000);
-    }, 1200); // Час на розчинення всього конверта
-  }, 1400); // Затримка, щоб дати листу "вилетіти" перед зникненням
+      env.style.display = "none";
+      createPetals();
+      // Вмикаємо музику
+      audio.muted = false;
+      audio.play().then(() => {
+        isPlaying = true;
+        musicBtn.textContent = "🔇";
+      });
+      
+      // Підказка про звук
+      setTimeout(() => {
+        const toast = document.getElementById("toast");
+        toast.textContent = "Натисніть 🎵, якщо не чуєте музику";
+        toast.className = "show";
+        setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 4000);
+      }, 2000);
+    }, 1000); // Даємо 1с на плавний перехід opacity
+  }, 1000); // Починаємо зникати, поки лист ще в русі
 } 
 
 function createPetals(){
