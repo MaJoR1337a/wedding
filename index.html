@@ -14,6 +14,8 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Great+Vibes&family=Montserrat:wght@300;400&display=swap" as="style">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Great+Vibes&family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
 
+<link rel="stylesheet" href="style.css">
+
 <style>
 :root{
   --vanilla:#ffe6d1;
@@ -462,6 +464,35 @@ input,select,textarea{
   border-radius:12px;
   border:1px solid #ddd;
 }
+form label {
+  display: block;
+  margin-top: 15px;
+  margin-bottom: 5px;
+}
+
+/* Стилі для секції дрес-коду */
+.dress-code .gallery {
+  max-width: 1000px;
+  margin: 20px auto;
+}
+.dress-code-note {
+  margin-top: 40px;
+}
+
+/* Стилі для секції побажань */
+.wishes-list {
+  list-style: none;
+  padding: 0;
+  max-width: 500px;
+  margin: 0 auto;
+  text-align: left;
+}
+.wishes-list li {
+  margin: 10px 0;
+}
+.wishes-thanks {
+  margin-top: 20px;
+}
 
 /* Стилі для чекбоксів алкоголю */
 .alcohol-grid {
@@ -495,6 +526,11 @@ input,select,textarea{
   max-height: 500px;
   opacity: 1;
 }
+.alcohol-prompt {
+  margin: 0 0 10px;
+  font-size: 14px;
+  color: #666;
+}
 .alcohol-label input {
   width: auto;
   margin: 0 10px 0 0;
@@ -515,6 +551,17 @@ button{
 button:hover{
   background:var(--deep);
   transform:translateY(-3px);
+}
+
+/* Стилі для футера */
+footer div {
+  text-align: center;
+  margin-bottom: 20px;
+}
+.footer-link, .footer-text {
+  margin: 0 10px;
+  color: white;
+  text-decoration: none;
 }
 
 .music-btn{
