@@ -1,3 +1,15 @@
+const weddingDateForRedirect = new Date("2026-10-10T15:00:00"); // Дата і час весілля
+const redirectDate = new Date(weddingDateForRedirect);
+redirectDate.setDate(weddingDateForRedirect.getDate() + 1); // Встановлюємо дату на наступний день після весілля
+redirectDate.setHours(0, 0, 0, 0); // Встановлюємо час на 00:00:00 наступного дня
+
+const currentDate = new Date();
+
+if (currentDate >= redirectDate) {
+  // Якщо поточна дата настала або пізніше, ніж 00:00 наступного дня після весілля, перенаправляємо
+  window.location.href = "post_wedding.html";
+}
+
 let isPlaying=!1;const audio=document.getElementById("bgMusic"),musicBtn=document.querySelector(".music-btn");function toggleMusic(){if(isPlaying)audio.pause(),isPlaying=!1,musicBtn.textContent="\uD83C\uDFB5";else{audio.muted=!1;let e=audio.play();void 0!==e&&e.then(()=>{isPlaying=!0,musicBtn.textContent="\uD83D\uDD07"}).catch(e=>{console.log("Помилка:",e)})}}function openInvite(){let e=document.getElementById("envelope"),t=document.getElementById("mainContent");e.classList.contains("open")||(e.classList.add("open"),e.style.pointerEvents="none",setTimeout(()=>{e.style.opacity="0",t.style.display="block",setTimeout(()=>{e.style.display="none",createPetals(),audio.muted=!1,audio.play().then(()=>{isPlaying=!0,musicBtn.textContent="\uD83D\uDD07"}),setTimeout(()=>{let e=document.getElementById("toast");e.textContent="Натисніть \uD83C\uDFB5, якщо не чуєте музику",e.className="show",setTimeout(()=>{e.className=e.className.replace("show","")},4e3)},2e3)},1e3)},1e3))}function createPetals(){for(let e=0;e<30;e++){let t=document.createElement("div");t.className="petal",t.style.left=100*Math.random()+"vw",t.style.animationDuration=5+5*Math.random()+"s",document.body.appendChild(t),setTimeout(()=>{t.remove()},1e4)}}let countdownAnimated=!1;function updateCountdown(){let e=new Date("2026-10-10T15:00:00").getTime(),t=new Date().getTime(),n=e-t;if(n<0){document.getElementById("countdown").innerHTML="Наш день настав \uD83E\uDD0D";return}let l=Math.floor(n/864e5),a=Math.floor(n%864e5/36e5),o=Math.floor(n%36e5/6e4),s=document.getElementById("countdown");if(0===s.children.length){if(s.innerHTML=`
       <div class="countdown-item" style="--i: 0;"><span>${l}</span>днів</div>
       <div class="countdown-item" style="--i: 1;"><span>${a}</span>годин</div>

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Наші спогади!</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📸</text></svg>">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Great+Vibes&family=Montserrat:wght@300;400&display=swap" as="style">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Great+Vibes&family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        :root{
+            --vanilla:#ffe6d1;
+            --almond:#9d806e;
+            --coffee:#724032;
+            --cabernet:#490018;
+            --deep:#320010;
+        }
+        body {
+            margin: 0;
+            font-family: 'Montserrat', sans-serif;
+            background: var(--vanilla);
+            color: var(--almond);
+            display: flex;
+            /* Додаємо анімацію зміни фону */
+            animation: backgroundTransition 15s ease infinite alternate;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3em;
+            color: var(--cabernet);
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+        .links-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+        .link-btn {
+            display: inline-block;
+            padding: 15px 30px;
+            background: var(--coffee);
+            color: white;
+            text-decoration: none;
+            border-radius: 30px;
+            font-size: 1.1em;
+            transition: background 0.3s ease, transform 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .link-btn:hover {
+            background: var(--cabernet);
+            transform: translateY(-3px);
+        }
+
+        /* Контейнер плеєра */
+        .player-controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 1000;
+            background: white;
+            padding: 6px 6px 6px 18px;
+            border-radius: 40px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            max-width: 44px; /* Тільки кнопка спочатку */
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        .player-controls.active {
+            max-width: 300px; /* Розширюється при відтворенні */
+        }
+        
+        .music-btn {
+            background: var(--vanilla);
+            border: none;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: background 0.3s;
+        }
+        /* Анімація поступової появи */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1, p, .link-btn {
+            opacity: 0;
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+
+        /* Інфо про пісню */
+        .player-info {
+            display: flex;
+            flex-direction: column;
+            min-width: 140px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .player-controls.active .player-info {
+            opacity: 1;
+        }
+        .player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+        .song-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--coffee);
+        }
+        .equalizer {
+            display: flex;
+            align-items: flex-end;
+            gap: 2px;
+            height: 10px;
+        }
+        .eq-bar {
+            width: 2px;
+            height: 100%;
+            background: var(--cabernet);
+            border-radius: 1px;
+            animation: equalize 1s ease-in-out infinite;
+            transform-origin: bottom;
+            animation-play-state: paused;
+        }
+        .player-controls.active .eq-bar {
+            animation-play-state: running;
+        }
+        .eq-bar:nth-child(1) { animation-duration: 0.8s; }
+        .eq-bar:nth-child(2) { animation-duration: 1.2s; }
+        .eq-bar:nth-child(3) { animation-duration: 0.9s; }
+
+        @keyframes equalize {
+            0%, 100% { transform: scaleY(0.4); }
+            50% { transform: scaleY(1); }
+        }
+
+        .progress-container { width: 100%; height: 3px; background: #eee; border-radius: 2px; }
+        .progress-bar { height: 100%; background: var(--cabernet); width: 0%; transition: width 0.1s linear; }
+        .time-remaining { font-size: 9px; color: var(--almond); text-align: right; margin-top: 2px; }
+
+        h1 { animation-delay: 0.2s; }
+        p { animation-delay: 0.4s; }
+        .link-btn:nth-child(1) { animation-delay: 0.7s; }
+        .link-btn:nth-child(2) { animation-delay: 0.9s; }
+        
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5em; }
+            p { font-size: 1em; }
+            .link-btn { padding: 12px 25px; font-size: 1em; }
+
+            /* Компактніший плеєр для мобільних */
+            .player-controls {
+                top: 10px;
+                right: 10px;
+                padding: 4px 4px 4px 12px;
+                max-width: 38px;
+            }
+            .player-controls.active { max-width: 220px; }
+            .music-btn { width: 30px; height: 30px; font-size: 14px; }
+            .player-info { min-width: 120px; }
+            .song-title { font-size: 10px; }
+            .equalizer { height: 8px; gap: 1.5px; }
+            .eq-bar { width: 1.5px; }
+        }
+
+        /* Анімація зміни фону */
+        @keyframes backgroundTransition {
+            0% { background-color: var(--vanilla); }
+            25% { background-color: #f0e0d0; } /* Трохи світліший відтінок ванілі */
+            50% { background-color: #e0d0c0; } /* Ще один проміжний відтінок */
+            75% { background-color: var(--almond); }
+            100% { background-color: var(--vanilla); }
+        }
+
+        /* Забезпечуємо, щоб текст залишався читабельним на різних фонах */
+        h1, p, .link-btn {
+            text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <!-- Новий аудіофайл (замініть memories.mp3 на вашу пісню) -->
+    <audio id="postWeddingMusic">
+        <source src="ZAYN_Dusk_Till_Dawn_feat_Sia128kb.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="player-controls">
+        <div class="player-info">
+            <div class="player-header">
+                <div class="song-title">ZAYN - Dusk Till Dawn (ft. Sia)</div>
+                <div class="equalizer">
+                    <div class="eq-bar"></div>
+                    <div class="eq-bar"></div>
+                    <div class="eq-bar"></div>
+                </div>
+            </div>
+            <div class="progress-container"><div id="progress-bar" class="progress-bar"></div></div>
+            <div id="time-remaining" class="time-remaining">-0:00</div>
+        </div>
+        <button class="music-btn" onclick="toggleMusic()" aria-label="Play/Pause">🎵</button>
+    </div>
+
+
+    <h1>Наші спогади!</h1>
+    <p>Дякуємо, що розділили з нами цей особливий день. Ось посилання на фотографії та відео:</p>
+    <div class="links-container">
+        <a href="#" class="link-btn" target="_blank">Фотографії 📸 (скоро)</a>
+        <a href="#" class="link-btn" target="_blank">Відео 🎥 (скоро)</a>
+        <!-- Додайте більше посилань, коли вони будуть готові -->
+    </div>
+
+    <script>
+        let isPlaying = false;
+        let fadeInterval;
+        const audio = document.getElementById("postWeddingMusic");
+        const musicBtn = document.querySelector(".music-btn");
+        const playerControls = document.querySelector(".player-controls");
+        const progressBar = document.getElementById("progress-bar");
+        const timeRemainingText = document.getElementById("time-remaining");
+
+        function formatTime(seconds) {
+            const min = Math.floor(seconds / 60);
+            const sec = Math.floor(seconds % 60);
+            return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+        }
+
+        function toggleMusic() {
+            clearInterval(fadeInterval);
+            if (isPlaying) {
+                // Плавне згасання (Fade Out) перед паузою
+                const fadeStep = 0.05;
+                fadeInterval = setInterval(() => {
+                    if (audio.volume > fadeStep) {
+                        audio.volume -= fadeStep;
+                    } else {
+                        audio.pause();
+                        audio.volume = 1; // Скидаємо гучність для наступного включення
+                        isPlaying = false;
+                        musicBtn.textContent = "🎵";
+                        playerControls.classList.remove("active");
+                        clearInterval(fadeInterval);
+                    }
+                }, 50); // Повне згасання приблизно за 1 секунду
+            } else {
+                // При включенні повертаємо повну гучність
+                audio.volume = 1;
+                
+                audio.play().then(() => {
+                    isPlaying = true;
+                    musicBtn.textContent = "🔇";
+                    playerControls.classList.add("active");
+                }).catch(err => {
+                    console.log("Відтворення заблоковано браузером. Потрібна взаємодія користувача.", err);
+                });
+            }
+        }
+
+        audio.ontimeupdate = () => {
+            if (audio.duration) {
+                const progress = (audio.currentTime / audio.duration) * 100;
+                progressBar.style.width = progress + "%";
+                
+                const remaining = audio.duration - audio.currentTime;
+                timeRemainingText.textContent = "-" + formatTime(remaining);
+            }
+        };
+
+        // Коли музика закінчиться, повертаємо плеєр у початковий стан
+        audio.onended = () => {
+            isPlaying = false;
+            musicBtn.textContent = "🎵";
+            playerControls.classList.remove("active");
+        };
+
+        // Автоматичний запуск музики після першого кліку користувача по будь-якому місцю сторінки
+        document.addEventListener('click', () => {
+            if (!isPlaying) toggleMusic();
+        }, { once: true });
+    </script>
+
+    <!-- Тимчасова кнопка для тестування (повернення на головну) -->
+    <a href="index.html" id="tempNavLinkIndex" style="position: fixed; bottom: 20px; left: 20px; z-index: 10001; background: var(--coffee); color: white; padding: 10px 15px; border-radius: 20px; text-decoration: none; font-size: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); font-family: 'Montserrat', sans-serif;">Повернутись до запрошення (тест)</a>
+
+    <script>
+      // Приховуємо тимчасові кнопки, якщо сайт не на localhost
+      if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        const tempButton = document.getElementById('tempNavLinkIndex');
+        if (tempButton) tempButton.style.display = 'none';
+      }
+    </script>
+
+</body>
+</html>

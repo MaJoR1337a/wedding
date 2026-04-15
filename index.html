@@ -847,7 +847,7 @@ footer div {
 
 <body>
 
-<audio id="bgMusic" loop autoplay muted>
+<audio id="bgMusic" autoplay muted>
   <source src="alex-warren-ordinary.mp3" type="audio/mpeg">
   Ваш браузер не підтримує аудіо.
 </audio>
@@ -1043,15 +1043,28 @@ footer div {
 <script>
 // Музика
 let isPlaying = false;
+let fadeInterval;
 const audio = document.getElementById("bgMusic");
 const musicBtn = document.querySelector(".music-btn");
 
 function toggleMusic() {
+  clearInterval(fadeInterval);
   if (isPlaying) {
-    audio.pause();
-    isPlaying = false;
-    musicBtn.textContent = "🎵";
+    // Плавне згасання (Fade Out) перед паузою
+    const fadeStep = 0.05;
+    fadeInterval = setInterval(() => {
+      if (audio.volume > fadeStep) {
+        audio.volume -= fadeStep;
+      } else {
+        audio.pause();
+        audio.volume = 1; // Скидаємо гучність для наступного включення
+        isPlaying = false;
+        musicBtn.textContent = "🎵";
+        clearInterval(fadeInterval);
+      }
+    }, 50); // Повне згасання приблизно за 1 секунду
   } else {
+    audio.volume = 1;
     audio.muted = false;
     const promise = audio.play();
     if (promise !== undefined) {
@@ -1505,4 +1518,16 @@ document.querySelectorAll('.gallery, .location-grid').forEach(container => {
   });
 });
 </script>
+
+<!-- Тимчасова кнопка для тестування (перехід на сторінку спогадів) -->
+<a href="post_wedding.html" id="tempNavLinkPostWedding" style="position: fixed; bottom: 20px; left: 20px; z-index: 10001; background: var(--cabernet); color: white; padding: 10px 15px; border-radius: 20px; text-decoration: none; font-size: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-family: 'Montserrat', sans-serif;">Перейти до сторінки спогадів (тест)</a>
+
+<script>
+  // Приховуємо тимчасові кнопки, якщо сайт не на localhost
+  if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    const tempButton = document.getElementById('tempNavLinkPostWedding');
+    if (tempButton) tempButton.style.display = 'none';
+  }
+</script>
+</body>
 </html>
