@@ -376,11 +376,29 @@ function fireConfetti(element) {
 // Ініціалізація галереї (збираємо всі фото)
 document.querySelectorAll('.gallery, .location-grid').forEach((galleryContainer) => {
     const imgs = Array.from(galleryContainer.querySelectorAll('img.view-img, img.style-img'));
-    const srcArray = imgs.map(img => img.src);
+    const srcArray = imgs.map(img => img.dataset.src || img.src);
     
     imgs.forEach((img, index) => {
         img.addEventListener('click', () => openLightbox(index, srcArray));
     });
+});
+
+// Lazy loading для изображений
+const imageObserver = new IntersectionObserver((entries, observer) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const img = entry.target;
+      if (img.dataset.src) {
+        img.src = img.dataset.src;
+        img.classList.add('loaded');
+      }
+      observer.unobserve(img);
+    }
+  });
+}, { rootMargin: '50px 0px' });
+
+document.querySelectorAll('img.lazy').forEach(img => {
+  imageObserver.observe(img);
 });
 
 // Анімація появи секцій при скроллі

@@ -823,3 +823,13 @@ footer div {
     transform: scale(1);
   }
 }
+
+/* Lazy loading для изображений */
+.lazy {
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.lazy.loaded {
+  opacity: 1;
+}

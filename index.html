@@ -943,12 +943,12 @@ footer div {
   <h2> 📷 Our history </h2>
   <div class="divider"></div>
   <div class="gallery history-gallery">
-    <img src="photo1.jpg" class="view-img" alt="Фото з нашої історії 1" loading="lazy">
-    <img src="photo2.jpg" class="view-img" alt="Фото з нашої історії 2" loading="lazy">
-    <img src="photo3.jpg" class="view-img" alt="Фото з нашої історії 3" loading="lazy">
-    <img src="photo4.jpg" class="view-img" alt="Фото з нашої історії 4" loading="lazy">
-    <img src="photo5.jpg" class="view-img" alt="Фото з нашої історії 5" loading="lazy">
-    <img src="photo6.jpg" class="view-img" alt="Фото з нашої історії 6" loading="lazy">
+    <img data-src="photo1.jpg" class="view-img lazy" alt="Фото з нашої історії 1" loading="lazy">
+    <img data-src="photo2.jpg" class="view-img lazy" alt="Фото з нашої історії 2" loading="lazy">
+    <img data-src="photo3.jpg" class="view-img lazy" alt="Фото з нашої історії 3" loading="lazy">
+    <img data-src="photo4.jpg" class="view-img lazy" alt="Фото з нашої історії 4" loading="lazy">
+    <img data-src="photo5.jpg" class="view-img lazy" alt="Фото з нашої історії 5" loading="lazy">
+    <img data-src="photo6.jpg" class="view-img lazy" alt="Фото з нашої історії 6" loading="lazy">
   </div>
 </section>
 
@@ -965,12 +965,12 @@ footer div {
   </div>
   <p style="margin-top:40px;">Приклади стилю:</p>
   <div class="gallery" style="max-width:1000px; margin:20px auto;">
-    <img src="vanilla.png" class="style-img" alt="Приклад дрес-коду у відтінку Vanilla" loading="lazy">
-    <img src="almond.png" class="style-img" alt="Приклад дрес-коду у відтінку Almond" loading="lazy">
-    <img src="coffee.png" class="style-img" alt="Приклад дрес-коду у відтінку Coffee" loading="lazy">
-    <img src="cabernet.png" class="style-img" alt="Приклад дрес-коду у відтінку Cabernet" loading="lazy">
-    <img src="Deep%20oak.png" class="style-img" alt="Приклад дрес-коду у відтінку Deep Oak" loading="lazy">
-    <img src="style.jpg" class="style-img" alt="Загальний приклад стилю дрес-коду" loading="lazy">
+    <img data-src="vanilla.png" class="style-img lazy" alt="Приклад дрес-коду у відтінку Vanilla" loading="lazy">
+    <img data-src="almond.png" class="style-img lazy" alt="Приклад дрес-коду у відтінку Almond" loading="lazy">
+    <img data-src="coffee.png" class="style-img lazy" alt="Приклад дрес-коду у відтінку Coffee" loading="lazy">
+    <img data-src="cabernet.png" class="style-img lazy" alt="Приклад дрес-коду у відтінку Cabernet" loading="lazy">
+    <img data-src="Deep%20oak.png" class="style-img lazy" alt="Приклад дрес-коду у відтінку Deep Oak" loading="lazy">
+    <img data-src="style.jpg" class="style-img lazy" alt="Загальний приклад стилю дрес-коду" loading="lazy">
   </div>
   <p style="margin-top:40px;">Будь ласка, уникайте яскравих неонових кольорів 🤍</p>
 </section>
@@ -1164,7 +1164,6 @@ if (window.innerWidth > 768) {
       
       const centerX = rect.width / 2;
       const centerY = rect.height / 2;
-      
       const rotateX = (y - centerY) / 10;
       const rotateY = (centerX - x) / 10;
       const translateX = (x - centerX) / 20;
