@@ -1041,6 +1041,13 @@ footer div {
 <button id="scrollTopBtn" title="Вгору">↑</button>
 
 <script>
+// Автоматичне перенаправлення на сторінку спогадів у день весілля
+const weddingDateForRedirect = new Date("2026-10-10T15:00:00");
+const currentDate = new Date();
+if (currentDate >= weddingDateForRedirect) {
+  window.location.href = "post_wedding.html";
+}
+
 // Музика
 let isPlaying = false;
 let fadeInterval;
@@ -1523,11 +1530,11 @@ document.querySelectorAll('.gallery, .location-grid').forEach(container => {
 <a href="post_wedding.html" id="tempNavLinkPostWedding" style="position: fixed; bottom: 20px; left: 20px; z-index: 10001; background: var(--cabernet); color: white; padding: 10px 15px; border-radius: 20px; text-decoration: none; font-size: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-family: 'Montserrat', sans-serif;">Перейти до сторінки спогадів (тест)</a>
 
 <script>
-  // Приховуємо тимчасові кнопки, якщо сайт не на localhost
-  if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-    const tempButton = document.getElementById('tempNavLinkPostWedding');
-    if (tempButton) tempButton.style.display = 'none';
-  }
+  // // Приховуємо тимчасові кнопки, якщо сайт не на localhost
+  // if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+  //   const tempButton = document.getElementById('tempNavLinkPostWedding');
+  //   if (tempButton) tempButton.style.display = 'none';
+  // }
 </script>
 </body>
 </html>
