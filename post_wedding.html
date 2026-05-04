@@ -207,6 +207,93 @@
         h1, p, .link-btn {
             text-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
+
+        /* Секція завантаження фото */
+        .upload-section {
+            margin-top: 40px;
+            width: 100%;
+            max-width: 600px;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border: 2px dashed var(--almond);
+            transition: transform 0.3s ease;
+        }
+        .upload-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        .upload-icon {
+            font-size: 50px;
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-10px);}
+            60% {transform: translateY(-5px);}
+        }
+
+        /* Секція коментарів */
+        .comment-section {
+            margin-top: 40px;
+            width: 100%;
+            max-width: 600px;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+        form#commentForm {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        #commentForm input, #commentForm textarea {
+            padding: 15px;
+            border-radius: 15px;
+            border: 1px solid var(--almond);
+            background: white;
+            font-family: inherit;
+            outline: none;
+        }
+        #commentForm textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        .comments-list {
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .comment-item {
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            /* Початковий стан для анімації появи */
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        .comment-name {
+            font-weight: bold;
+            color: var(--cabernet);
+            margin-bottom: 5px;
+            display: block;
+        }
+        .comment-text {
+            font-size: 0.95em;
+            line-height: 1.4;
+            color: var(--coffee);
+        }
+        /* Клас, який запускає анімацію */
+        .comment-item.animate-in {
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
     </style>
 </head>
 <body>
@@ -239,6 +326,32 @@
         <a href="#" class="link-btn" target="_blank">Відео 🎥 (скоро)</a>
         <!-- Додайте більше посилань, коли вони будуть готові -->
     </div>
+
+    <section class="upload-section">
+        <div class="upload-card">
+            <div class="upload-icon">📸</div>
+            <h2>Ваші фото та відео</h2>
+            <p>Допоможіть нам зберегти цей день назавжди! <br> Завантажуйте свої кадри у наш спільний альбом:</p>
+            <!-- ЗАМІНІТЬ ПОСИЛАННЯ НИЖЧЕ НА ВАШ GOOGLE DRIVE / DROPBOX / ICLOUD -->
+            <a href="https://photos.app.goo.gl/canDLjngQ294ojXS7" class="link-btn" target="_blank">
+                Додати фото в альбом ⬆️
+            </a>
+            <p style="font-size: 0.8em; margin-top: 10px; opacity: 0.7;">(Ви можете завантажити файли прямо з телефона)</p>
+        </div>
+    </section>
+
+    <section class="comment-section">
+        <h2>Книга побажань ✍️</h2>
+        <p>Залиште свої теплі слова або враження від нашого свята!</p>
+        <form id="commentForm">
+            <input type="text" name="name" placeholder="Ваше ім'я" required>
+            <textarea name="wishes" placeholder="Ваше побажання або коментар" required></textarea>
+            <button type="submit" class="link-btn" style="border:none; cursor:pointer;">Надіслати 💌</button>
+        </form>
+        <div id="commentsList" class="comments-list">
+            <!-- Тут з'являтимуться нові коментарі -->
+        </div>
+    </section>
 
     <script>
         let isPlaying = false;
@@ -307,17 +420,70 @@
         document.addEventListener('click', () => {
             if (!isPlaying) toggleMusic();
         }, { once: true });
+
+        // Обробка форми коментарів
+        document.getElementById("commentForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+            
+            const name = this.querySelector("input[name='name']").value.trim();
+            const wishes = this.querySelector("textarea[name='wishes']").value.trim();
+            const submitBtn = this.querySelector("button[type='submit']");
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Надсилаю...";
+
+            const data = {
+                name: name,
+                attendance: "comment_only", // Мітка для Google Таблиці
+                alcohol: "—",
+                wishes: wishes
+            };
+
+            try {
+                // Використовуємо ваш існуючий скрипт
+                await fetch("https://script.google.com/macros/s/AKfycbwKaxAWQrS76ueztsFH8YB2_Pq_9-yxpq5f-c5mYwFtgc0fjZEjR8wMO7O9rVd1J7W0LA/exec", {
+                    method: "POST",
+                    body: JSON.stringify(data)
+                });
+
+                // Додаємо коментар у список на сторінці для візуального підтвердження
+                const commentsList = document.getElementById("commentsList");
+                const newComment = document.createElement("div");
+                newComment.className = "comment-item";
+                newComment.innerHTML = `
+                    <span class="comment-name">${name}</span>
+                    <div class="comment-text">${wishes}</div>
+                `;
+                commentsList.prepend(newComment);
+                // Запускаємо анімацію після додавання елемента в DOM
+                requestAnimationFrame(() => {
+                    newComment.classList.add('animate-in');
+                });
+
+                // Очищуємо форму
+                this.reset();
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Надіслано! ✨";
+                setTimeout(() => { submitBtn.textContent = "Надіслати ще 💌"; }, 3000);
+
+            } catch (error) {
+                console.error("Помилка:", error);
+                alert("Сталася помилка при відправці. Спробуйте ще раз.");
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Надіслати 💌";
+            }
+        });
     </script>
 
     <!-- Тимчасова кнопка для тестування (повернення на головну) -->
     <a href="index.html" id="tempNavLinkIndex" style="position: fixed; bottom: 20px; left: 20px; z-index: 10001; background: var(--coffee); color: white; padding: 10px 15px; border-radius: 20px; text-decoration: none; font-size: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); font-family: 'Montserrat', sans-serif;">Повернутись до запрошення (тест)</a>
 
     <script>
-      // Приховуємо тимчасові кнопки, якщо сайт не на localhost
-      if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-        const tempButton = document.getElementById('tempNavLinkIndex');
-        if (tempButton) tempButton.style.display = 'none';
-      }
+      // // Приховуємо тимчасові кнопки, якщо сайт не на localhost
+      // if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      //   const tempButton = document.getElementById('tempNavLinkIndex');
+      //   if (tempButton) tempButton.style.display = 'none';
+      // }
     </script>
 
 </body>
