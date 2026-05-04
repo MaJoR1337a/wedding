@@ -1,12 +1,9 @@
 const weddingDateForRedirect = new Date("2026-10-10T15:00:00"); // Дата і час весілля
-const redirectDate = new Date(weddingDateForRedirect);
-redirectDate.setDate(weddingDateForRedirect.getDate() + 1); // Встановлюємо дату на наступний день після весілля
-redirectDate.setHours(0, 0, 0, 0); // Встановлюємо час на 00:00:00 наступного дня
 
 const currentDate = new Date();
 
-if (currentDate >= redirectDate) {
-  // Якщо поточна дата настала або пізніше, ніж 00:00 наступного дня після весілля, перенаправляємо
+if (currentDate >= weddingDateForRedirect) {
+  // Якщо час весілля настав, перенаправляємо на сторінку спогадів
   window.location.href = "post_wedding.html";
 }
 
