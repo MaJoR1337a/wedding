@@ -1,14 +1,417 @@
-const weddingDateForRedirect = new Date("2026-10-10T15:00:00"); // Дата і час весілля
+// --- Конфігурація та константи ---
+const WEDDING_DATE = new Date("2026-10-10T15:00:00");
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwKaxAWQrS76ueztsFH8YB2_Pq_9-yxpq5f-c5mYwFtgc0fjZEjR8wMO7O9rVd1J7W0LA/exec"; // Вставте сюди ваш новий URL
 
+const CONFIG = {
+  petalCount: 30,
+  confettiCount: 100,
+  fadeStep: 0.05,
+  fadeInterval: 50,
+  toastDuration: 3000,
+  countdownUpdateRate: 1000 // 1 секунда
+};
+
+// --- Кешування DOM елементів ---
+const audio = document.getElementById("bgMusic");
+const musicBtn = document.querySelector(".music-btn");
+const toast = document.getElementById("toast");
+const envelope = document.getElementById("envelope");
+const mainContent = document.getElementById("mainContent");
+const countdownDiv = document.getElementById("countdown");
+const rsvpForm = document.getElementById("rsvpForm");
+const alcoholWrapper = document.getElementById("alcohol-wrapper");
+const thanksMessage = document.getElementById("thanks");
+const scrollTopBtn = document.getElementById("scrollTopBtn");
+const lightbox = document.getElementById('lightbox');
+const lightboxImg = document.getElementById('lightbox-img');
+
+// Автоматичне перенаправлення
 const currentDate = new Date();
-
-if (currentDate >= weddingDateForRedirect) {
-  // Якщо час весілля настав, перенаправляємо на сторінку спогадів
+if (currentDate >= WEDDING_DATE) {
   window.location.href = "post_wedding.html";
 }
 
-let isPlaying=!1;const audio=document.getElementById("bgMusic"),musicBtn=document.querySelector(".music-btn");function toggleMusic(){if(isPlaying)audio.pause(),isPlaying=!1,musicBtn.textContent="\uD83C\uDFB5";else{audio.muted=!1;let e=audio.play();void 0!==e&&e.then(()=>{isPlaying=!0,musicBtn.textContent="\uD83D\uDD07"}).catch(e=>{console.log("Помилка:",e)})}}function openInvite(){let e=document.getElementById("envelope"),t=document.getElementById("mainContent");e.classList.contains("open")||(e.classList.add("open"),e.style.pointerEvents="none",setTimeout(()=>{e.style.opacity="0",t.style.display="block",setTimeout(()=>{e.style.display="none",createPetals(),audio.muted=!1,audio.play().then(()=>{isPlaying=!0,musicBtn.textContent="\uD83D\uDD07"}),setTimeout(()=>{let e=document.getElementById("toast");e.textContent="Натисніть \uD83C\uDFB5, якщо не чуєте музику",e.className="show",setTimeout(()=>{e.className=e.className.replace("show","")},4e3)},2e3)},1e3)},1e3))}function createPetals(){for(let e=0;e<30;e++){let t=document.createElement("div");t.className="petal",t.style.left=100*Math.random()+"vw",t.style.animationDuration=5+5*Math.random()+"s",document.body.appendChild(t),setTimeout(()=>{t.remove()},1e4)}}let countdownAnimated=!1;function updateCountdown(){let e=new Date("2026-10-10T15:00:00").getTime(),t=new Date().getTime(),n=e-t;if(n<0){document.getElementById("countdown").innerHTML="Наш день настав \uD83E\uDD0D";return}let l=Math.floor(n/864e5),a=Math.floor(n%864e5/36e5),o=Math.floor(n%36e5/6e4),s=document.getElementById("countdown");if(0===s.children.length){if(s.innerHTML=`
-      <div class="countdown-item" style="--i: 0;"><span>${l}</span>днів</div>
-      <div class="countdown-item" style="--i: 1;"><span>${a}</span>годин</div>
-      <div class="countdown-item" style="--i: 2;"><span>${o}</span>хвилин</div>
-    `,!countdownAnimated){let r=document.querySelectorAll(".countdown-item");r.forEach((e,t)=>{e.classList.add("animate")}),countdownAnimated=!0}}else s.children[0].querySelector("span").textContent=l,s.children[1].querySelector("span").textContent=a,s.children[2].querySelector("span").textContent=o}setInterval(updateCountdown,1e4),updateCountdown(),window.innerWidth>768&&document.querySelectorAll(".gallery img").forEach(e=>{e.addEventListener("mousemove",function(e){let t=this.getBoundingClientRect(),n=e.clientX-t.left,l=e.clientY-t.top,a=t.width/2,o=t.height/2;this.style.transform=`scale(1.15) rotateX(${(l-o)/10}deg) rotateY(${(a-n)/10}deg) translate(${(n-a)/20}px, ${(l-o)/20}px)`}),e.addEventListener("mouseleave",function(){this.style.transform="scale(1) rotateX(0deg) rotateY(0deg) translate(0px, 0px)"})}),document.getElementById("rsvpForm").addEventListener("submit",async function(e){e.preventDefault();let t=this.querySelector("input[name='name']").value.trim(),n=this.querySelector("select[name='attendance']").value,l=this.querySelector("textarea[name='wishes']").value.trim(),a=this.querySelectorAll("input[name='alcohol']:checked");if(!t||!n){alert("Будь ласка, заповніть обов'язкові поля.");return}if("yes"===n&&0===a.length){alert("Будь ласка, оберіть хоча б один напій (можна 'Без алкоголю') \uD83E\uDD42");return}let o=Array.from(a).map(e=>e.value).join(", "),s=this.querySelector("button[type='submit']");fireConfetti(s),s.disabled=!0,s.textContent="Надсилаю...","no"===n&&(o="—");let r={name:t,attendance:n,alcohol:o,wishes:l};try{await fetch("https://script.google.com/macros/s/AKfycbwKaxAWQrS76ueztsFH8YB2_Pq_9-yxpq5f-c5mYwFtgc0fjZEjR8wMO7O9rVd1J7W0LA/exec",{method:"POST",body:JSON.stringify(r)}),document.getElementById("thanks").style.display="block",this.reset(),s.disabled=!1,s.textContent="Надіслати"}catch(i){alert("Помилка відправки \uD83D\uDE22"),console.log("Помилка:",i),s.disabled=!1,s.textContent="Надіслати"}});const attendanceSelect=document.querySelector("select[name='attendance']"),alcoholWrapper=document.getElementById("alcohol-wrapper");function openGoogleCalendar(){let e=encodeURIComponent("Весілля Олександра та Альони"),t=encodeURIComponent("Запрошуємо вас розділити з нами наш особливий день!"),n=encodeURIComponent("Ресторан Сім-Сім, м. Харків");window.open(`https://www.google.com/calendar/render?action=TEMPLATE&text=${e}&dates=20261010T120000Z/20261010T200000Z&details=${t}&location=${n}`,"_blank")}attendanceSelect.addEventListener("change",function(){"no"===this.value?(alcoholWrapper.classList.remove("show"),setTimeout(()=>{"no"===this.value&&(alcoholWrapper.style.display="none")},500)):(alcoholWrapper.style.display="block",setTimeout(()=>{alcoholWrapper.classList.add("show")},10))});let currentImageIndex=0,currentGalleryImages=[];function openLightbox(e,t){currentGalleryImages=t,currentImageIndex=e,updateLightboxImage();let n=document.getElementById("lightbox");n.style.display="flex",document.body.style.overflow="hidden",setTimeout(()=>{n.classList.add("show")},10)}function closeLightbox(){let e=document.getElementById("lightbox");e.classList.remove("show"),document.body.style.overflow="",setTimeout(()=>{e.display="none"},300)}function changeSlide(e){(currentImageIndex+=e)>=currentGalleryImages.length&&(currentImageIndex=0),currentImageIndex<0&&(currentImageIndex=currentGalleryImages.length-1),updateLightboxImage()}function updateLightboxImage(){let e=document.getElementById("lightbox-img");e.style.opacity=0,setTimeout(()=>{e.src=currentGalleryImages[currentImageIndex],e.style.opacity=1},150)}document.addEventListener("keydown",function(e){"flex"===document.getElementById("lightbox").style.display&&("ArrowLeft"===e.key&&changeSlide(-1),"ArrowRight"===e.key&&changeSlide(1),"Escape"===e.key&&closeLightbox())});let touchStartX=0;const lightboxEl=document.getElementById("lightbox");async function downloadICS(){let e="BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Wedding//EN\r\nCALSCALE:GREGORIAN\r\nBEGIN:VEVENT\r\nDTSTART:20261010T120000Z\r\nDTEND:20261010T200000Z\r\nSUMMARY:Весілля Олександра та Альони\r\nDESCRIPTION:Запрошуємо вас розділити з нами наш особливий день!\r\nLOCATION:Ресторан Сім-Сім, м. Харків\r\nSTATUS:CONFIRMED\r\nSEQUENCE:0\r\nEND:VEVENT\r\nEND:VCALENDAR",t="wedding_invite.ics",n=/CriOS/i.test(navigator.userAgent);if(!n&&navigator.share)try{let l=new File([e],t,{type:"text/calendar"});if(navigator.canShare({files:[l]})){await navigator.share({files:[l],title:"Запрошення на весілля"});return}}catch(a){console.error("Sharing failed",a)}let o=btoa(unescape(encodeURIComponent(e))),s=`data:application/octet-stream;base64,${o}`;if(n)window.location.href=s;else{let r=new Blob([e],{type:"text/calendar"}),i=document.createElement("a");window.URL?i.href=window.URL.createObjectURL(r):i.href=s,i.setAttribute("download",t),document.body.appendChild(i),i.click(),setTimeout(()=>document.body.removeChild(i),100)}let c=document.getElementById("toast");c.textContent="Файл збережено! Відкрийте його, щоб додати подію.",c.className="show",setTimeout(()=>{c.className=c.className.replace("show",""),setTimeout(()=>{c.textContent="Адресу скопійовано!"},500)},4e3)}function fireConfetti(e){let t=e.getBoundingClientRect(),n=t.left+t.width/2,l=t.top+t.height/2,a=["#ffe6d1","#9d806e","#724032","#490018","#320010","#ffd700"];for(let o=0;o<100;o++){let s=document.createElement("div");s.classList.add("confetti"),s.style.backgroundColor=a[Math.floor(Math.random()*a.length)],s.style.left=n+"px",s.style.top=l+"px",s.style.setProperty("--tx",(Math.random()-.5)*300+"px"),s.style.setProperty("--ty",(Math.random()-1)*300+"px"),document.body.appendChild(s),setTimeout(()=>s.remove(),1e3)}}lightboxEl.addEventListener("touchstart",e=>{touchStartX=e.changedTouches[0].screenX}),lightboxEl.addEventListener("touchend",e=>{let t=e.changedTouches[0].screenX;t<touchStartX-50&&changeSlide(1),t>touchStartX+50&&changeSlide(-1)}),document.querySelectorAll(".gallery, .location-grid").forEach(e=>{let t=Array.from(e.querySelectorAll("img.view-img, img.style-img")),n=t.map(e=>e.dataset.src||e.src);t.forEach((e,t)=>{e.addEventListener("click",()=>openLightbox(t,n))})});const imageObserver=new IntersectionObserver((e,t)=>{e.forEach(e=>{if(e.isIntersecting){let n=e.target;n.dataset.src&&(n.src=n.dataset.src,n.classList.add("loaded")),t.unobserve(n)}})},{rootMargin:"50px 0px"});document.querySelectorAll("img.lazy").forEach(e=>{imageObserver.observe(e)});const observer=new IntersectionObserver(e=>{e.forEach(e=>{e.isIntersecting&&(e.target.classList.add("visible"),observer.unobserve(e.target))})},{threshold:.1});function copyAddress(){navigator.clipboard.writeText("Ресторан Сім-Сім, м. Харків").then(()=>{let e=document.getElementById("toast");e.className="show",setTimeout(()=>{e.className=e.className.replace("show","")},3e3)}).catch(e=>{console.error("Failed to copy: ",e)})}document.querySelectorAll(".fade-in").forEach(e=>{observer.observe(e)});const scrollBtn=document.getElementById("scrollTopBtn");function handleBackgroundMusic(){document.hidden||"hidden"===document.visibilityState?audio.pause():isPlaying&&audio.play()}window.addEventListener("scroll",()=>{window.scrollY>300?scrollBtn.classList.add("show"):scrollBtn.classList.remove("show")}),scrollBtn.addEventListener("click",()=>{window.scrollTo({top:0,behavior:"smooth"})}),document.addEventListener("visibilitychange",handleBackgroundMusic),window.addEventListener("pagehide",handleBackgroundMusic);
+// Музика
+let isPlaying = false;
+let fadeInterval;
+
+function toggleMusic() {
+  clearInterval(fadeInterval);
+  if (isPlaying) {
+    fadeInterval = setInterval(() => {
+      if (audio.volume > CONFIG.fadeStep) {
+        audio.volume -= CONFIG.fadeStep;
+      } else {
+        audio.pause();
+        audio.volume = 1;
+        isPlaying = false;
+        musicBtn.textContent = "🎵";
+        clearInterval(fadeInterval);
+      }
+    }, CONFIG.fadeInterval);
+  } else {
+    audio.volume = 1;
+    audio.muted = false;
+    audio.play().then(() => {
+      isPlaying = true;
+      musicBtn.textContent = "🔇";
+    }).catch(err => console.log("Music play blocked:", err));
+  }
+}
+
+function showToast(message) {
+  toast.textContent = message;
+  toast.classList.add("show");
+  setTimeout(() => toast.classList.remove("show"), CONFIG.toastDuration);
+}
+
+function openInvite(){
+  if (envelope.classList.contains("open")) return;
+
+  envelope.classList.add("open");
+  envelope.style.pointerEvents = "none";
+  
+  setTimeout(() => {
+    envelope.style.opacity = "0";
+    mainContent.style.display = "block";
+
+    setTimeout(() => {
+      envelope.style.display = "none";
+      createPetals();
+      audio.muted = false;
+      audio.play().then(() => {
+        isPlaying = true;
+        musicBtn.textContent = "🔇";
+      }).catch(error => {
+        console.error("Помилка:", error);
+      });
+
+      setTimeout(() => {
+        showToast("Натисніть 🎵, якщо не чуєте музику");
+      }, 2000);
+    }, 1000);
+  }, 1000);
+} 
+
+function createPetals(){
+  for(let i=0; i < CONFIG.petalCount; i++){
+    let petal=document.createElement("div");
+    petal.className="petal";
+    petal.style.left=Math.random()*100+"vw";
+    petal.style.animationDuration=(5+Math.random()*5)+"s";
+    document.body.appendChild(petal);
+    setTimeout(() => { petal.remove(); }, 10000);
+  }
+}
+
+let countdownAnimated = false;
+function updateCountdown(){
+  const now = new Date().getTime();
+  const distance = WEDDING_DATE.getTime() - now;
+
+  if(distance < 0){
+    countdownDiv.innerHTML = "Наш день настав 🤍";
+    return;
+  }
+
+  const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+
+  if (countdownDiv.children.length === 0) {
+    countdownDiv.innerHTML = `
+      <div class="countdown-item" style="--i: 0;"><span>${days}</span>днів</div>
+      <div class="countdown-item" style="--i: 1;"><span>${hours}</span>годин</div>
+      <div class="countdown-item" style="--i: 2;"><span>${minutes}</span>хвилин</div>
+    `;
+    if (!countdownAnimated) {
+      const items = document.querySelectorAll('.countdown-item');
+      items.forEach((item, index) => {
+        item.classList.add('animate');
+      });
+      countdownAnimated = true;
+    }
+  } else {
+    countdownDiv.children[0].querySelector('span').textContent = days;
+    countdownDiv.children[1].querySelector('span').textContent = hours;
+    countdownDiv.children[2].querySelector('span').textContent = minutes;
+  }
+}
+
+setInterval(updateCountdown, CONFIG.countdownUpdateRate);
+updateCountdown();
+
+// Эффект параллакса для фотографий (тільки на десктопі)
+if (window.innerWidth > 768) {
+  document.querySelectorAll('.gallery img').forEach(img => {
+    img.addEventListener('mousemove', function(e) {
+      const rect = this.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const rotateX = (y - centerY) / 10;
+      const rotateY = (centerX - x) / 10;
+      const translateX = (x - centerX) / 20;
+      const translateY = (y - centerY) / 20;
+      
+      this.style.transform = `scale(1.15) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translate(${translateX}px, ${translateY}px)`;
+    });
+    
+    img.addEventListener('mouseleave', function() {
+      this.style.transform = 'scale(1) rotateX(0deg) rotateY(0deg) translate(0px, 0px)';
+    });
+  });
+}
+
+rsvpForm.addEventListener("submit", async function(e){
+  e.preventDefault();
+
+  const name = this.querySelector("input[name='name']").value.trim();
+  const attendance = this.querySelector("select[name='attendance']").value;
+  const wishes = this.querySelector("textarea[name='wishes']").value.trim();
+  
+  // Збираємо всі вибрані чекбокси в один рядок
+  const alcoholChecked = this.querySelectorAll("input[name='alcohol']:checked");
+  
+  if (name.length < 2) {
+    showToast("Будь ласка, введіть коректне ім'я (мінімум 2 символи).");
+    return;
+  }
+
+  if (!attendance) {
+    showToast("Будь ласка, оберіть варіант присутності.");
+    return;
+  }
+  
+  if (attendance === "yes" && alcoholChecked.length === 0) {
+    showToast("Будь ласка, оберіть напій 🥂");
+    return;
+  }
+
+  if (wishes.length > 0 && wishes.length < 5) {
+    showToast("Побажання занадто коротке (мінімум 5 символів).");
+    return;
+  }
+
+  let alcohol = Array.from(alcoholChecked).map(cb => cb.value).join(", ");
+
+  const submitBtn = this.querySelector("button[type='submit']");
+  fireConfetti(submitBtn); // Запуск конфетті
+  
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Надсилаю...";
+
+  if (attendance === "no") alcohol = "—";
+
+  const data = {
+    name,
+    attendance,
+    alcohol,
+    wishes
+  };
+
+  try {
+    const response = await fetch(GOOGLE_SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors", // Дозволяє відправку без помилок CORS
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(data)
+    });
+
+    thanksMessage.style.display="block";
+    this.reset();
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Надіслати";
+  } catch (error) {
+    showToast("Помилка відправки 😢");
+    console.error("Помилка:", error);
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Надіслати";
+  }
+});
+
+// Логіка для форми: ховаємо алкоголь, якщо гість не прийде
+document.querySelector("select[name='attendance']").addEventListener("change", function() {
+  if (this.value === "no") {
+    alcoholWrapper.classList.remove('show');
+    setTimeout(() => {
+      if(this.value === "no") alcoholWrapper.style.display = "none";
+    }, 500); 
+  } else {
+    alcoholWrapper.style.display = "block";
+    setTimeout(() => {
+      alcoholWrapper.classList.add('show');
+    }, 10); // Невелика затримка, щоб display:block застосувався до початку transition
+  }
+});
+
+// Функції для lightbox
+let currentImageIndex = 0;
+let currentGalleryImages = [];
+
+function openLightbox(index, imagesArray) {
+  currentGalleryImages = imagesArray;
+  currentImageIndex = index;
+  updateLightboxImage();
+  
+  lightbox.style.display = 'flex';
+  document.body.style.overflow = 'hidden'; // Блокуємо скрол сторінки
+  setTimeout(() => {
+    lightbox.classList.add('show');
+  }, 10);
+}
+
+function closeLightbox() {
+  lightbox.classList.remove('show');
+  document.body.style.overflow = ''; // Відновлюємо скрол
+  setTimeout(() => {
+    lightbox.style.display = 'none';
+  }, 300);
+}
+
+function changeSlide(n) {
+  currentImageIndex += n;
+  if (currentImageIndex >= currentGalleryImages.length) currentImageIndex = 0;
+  if (currentImageIndex < 0) currentImageIndex = currentGalleryImages.length - 1;
+  updateLightboxImage();
+}
+
+function updateLightboxImage() {
+  lightboxImg.style.opacity = 0;
+  setTimeout(() => {
+    lightboxImg.src = currentGalleryImages[currentImageIndex];
+    lightboxImg.style.opacity = 1;
+  }, 150);
+}
+
+// Клавіатура (стрілки) та свайпи
+document.addEventListener('keydown', function(e) {
+  if (lightbox.style.display === 'flex') {
+    if (e.key === 'ArrowLeft') changeSlide(-1);
+    if (e.key === 'ArrowRight') changeSlide(1);
+    if (e.key === 'Escape') closeLightbox();
+  }
+});
+
+let touchStartX = 0;
+
+lightbox.addEventListener('touchstart', e => {
+  touchStartX = e.changedTouches[0].screenX;
+});
+
+lightbox.addEventListener('touchend', e => {
+  const touchEndX = e.changedTouches[0].screenX;
+  if (touchEndX < touchStartX - 50) changeSlide(1); // Свайп вліво (наступне)
+  if (touchEndX > touchStartX + 50) changeSlide(-1); // Свайп вправо (попереднє)
+});
+
+// Функція запуску конфетті
+function fireConfetti(element) {
+  const rect = element.getBoundingClientRect();
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
+  const colors = ['#ffe6d1', '#9d806e', '#724032', '#490018', '#320010', '#ffd700'];
+
+  for (let i = 0; i < CONFIG.confettiCount; i++) {
+    const confetti = document.createElement('div');
+    confetti.classList.add('confetti');
+    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+    confetti.style.left = centerX + 'px';
+    confetti.style.top = centerY + 'px';
+    
+    // Випадковий напрямок розльоту
+    confetti.style.setProperty('--tx', (Math.random() - 0.5) * 300 + 'px');
+    confetti.style.setProperty('--ty', (Math.random() - 1) * 300 + 'px'); // Більше вгору
+    
+    document.body.appendChild(confetti);
+    setTimeout(() => confetti.remove(), 1000);
+  }
+}
+
+// Анімація появи секцій при скроллі
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      observer.unobserve(entry.target); // Анімація тільки один раз
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.fade-in').forEach(section => {
+  observer.observe(section);
+});
+
+// Функція копіювання адреси
+function copyAddress() {
+  const text = "Ресторан Сім-Сім, м. Харків";
+  navigator.clipboard.writeText(text).then(() => {
+    showToast("Адресу скопійовано!");
+  }).catch(err => {
+    console.error('Failed to copy: ', err);
+  });
+}
+
+// Логіка кнопки "Вгору"
+window.addEventListener("scroll", () => {
+  if (window.scrollY > 300) {
+    scrollTopBtn.classList.add("show");
+  } else {
+    scrollTopBtn.classList.remove("show");
+  }
+});
+
+scrollTopBtn.addEventListener("click", () => {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
+
+// Покращена зупинка музики для мобільних (згортання, блокування екрану)
+function handleBackgroundMusic() {
+  if (document.hidden || document.visibilityState === 'hidden') {
+    audio.pause();
+  } else if (isPlaying) {
+    audio.play();
+  }
+}
+
+document.addEventListener("visibilitychange", handleBackgroundMusic);
+window.addEventListener("pagehide", handleBackgroundMusic);
+
+// Lazy loading для зображень
+const imageObserver = new IntersectionObserver((entries, observer) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const img = entry.target;
+      if (img.dataset.src) {
+        img.src = img.dataset.src;
+        img.classList.add('loaded');
+      }
+      observer.unobserve(img);
+    }
+  });
+}, { rootMargin: '50px 0px' });
+
+document.querySelectorAll('img.lazy').forEach(img => {
+  imageObserver.observe(img);
+});
+
+// Код для відкриття лайтбоксу на клік по зображеннях
+document.querySelectorAll('.gallery, .location-grid').forEach(container => {
+  const images = Array.from(container.querySelectorAll('img.view-img, img.style-img'));
+  const sources = images.map((img) => img.dataset.src || img.currentSrc || img.src);
+  images.forEach((img, index) => {
+    img.addEventListener('click', () => openLightbox(index, sources));
+  });
+});
+
+// Кнопка для примусового переходу на сторінку спогадів (працює і локально, і на хостингу)
+const postWeddingManualBtn = document.createElement("button");
+postWeddingManualBtn.innerHTML = "📸 Спогади";
+postWeddingManualBtn.className = "manual-memories-btn";
+
+postWeddingManualBtn.onclick = () => { window.location.href = "post_wedding.html"; };
+postWeddingManualBtn.onmouseenter = () => postWeddingManualBtn.style.transform = "scale(1.1)";
+postWeddingManualBtn.onmouseleave = () => postWeddingManualBtn.style.transform = "scale(1)";
+document.body.appendChild(postWeddingManualBtn);
