@@ -1,6 +1,6 @@
 // --- Конфігурація та константи ---
 const WEDDING_DATE = new Date("2026-10-10T15:00:00");
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwIMp4OcQqRkepcIA-DHJhtSK2Ets2JAVliWTCcEpr85pZ06bIUbBBiG3aVDv7N8cH5Nw/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwFwd_MsQbNQnYIB-pPW8C1us2guGyNBGcHf3u65ckyKCstBO3jk72Ow2d_EnCXz3NHug/exec";
 
 const CONFIG = {
   petalCount: 30,
@@ -29,6 +29,36 @@ const lightboxImg = document.getElementById('lightbox-img');
 const currentDate = new Date();
 if (currentDate >= WEDDING_DATE) {
   window.location.href = "post_wedding.html";
+}
+
+// Спочатку сховати конверт, показати відео
+envelope.style.display = "none";
+const videoContainer = document.getElementById("intro-video-container");
+const introVideo = document.getElementById("intro-video");
+
+// Показати конверт через 5 секунд або коли відео закінчиться
+function showEnvelope() {
+  if (videoContainer) {
+    videoContainer.style.transition = "opacity 0.8s ease-out";
+    videoContainer.style.opacity = "0";
+    setTimeout(() => {
+      videoContainer.style.display = "none";
+      envelope.style.display = "flex";
+      envelope.style.opacity = "0";
+      setTimeout(() => {
+        envelope.style.transition = "opacity 0.8s ease-in";
+        envelope.style.opacity = "1";
+      }, 10);
+    }, 800);
+  }
+}
+
+// Показати конверт через 5 секунд
+setTimeout(showEnvelope, 5000);
+
+// Якщо відео закінчиться, також показати конверт
+if (introVideo) {
+  introVideo.addEventListener("ended", showEnvelope);
 }
 
 // Музика
@@ -66,26 +96,33 @@ function showToast(message) {
 }
 
 async function postFormData(data) {
+  console.log("RSVP post data:", data);
+  const body = new URLSearchParams();
+  Object.entries(data).forEach(([key, value]) => body.append(key, value));
+
   try {
     const response = await fetch(GOOGLE_SCRIPT_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
+      body
     });
 
+    console.log("Fetch response:", response);
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
     }
 
-    return response;
+    const json = await response.json();
+    console.log("Server response:", json);
+    return json;
   } catch (error) {
-    console.warn("POST failed, retrying with no-cors fallback:", error);
-    return await fetch(GOOGLE_SCRIPT_URL, {
+    console.warn("Primary POST failed, retrying with no-cors fallback:", error);
+    const response = await fetch(GOOGLE_SCRIPT_URL, {
       method: "POST",
       mode: "no-cors",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify(data)
+      body
     });
+    console.log("No-cors response:", response);
+    return { type: response.type || "opaque", result: "success" };
   }
 }
 
@@ -237,7 +274,12 @@ rsvpForm.addEventListener("submit", async function(e){
   };
 
   try {
-    await postFormData(data);
+    const result = await postFormData(data);
+    const success = result && (result.result === "success" || result.type === "opaque");
+
+    if (!success) {
+      throw new Error(result && result.error ? result.error : "Server response was not successful");
+    }
 
     thanksMessage.style.display="block";
     this.reset();
