@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="post_wedding.css">
 </head>
 <body>
-    <audio id="postWeddingMusic" preload="metadata">
+    <audio id="postWeddingMusic" preload="metadata" autoplay loop playsinline>
         <source src="ZAYN_Dusk_Till_Dawn_feat_Sia128kb.mp3" type="audio/mpeg">
     </audio>
 
@@ -51,21 +51,6 @@
         </div>
     </section>
 
-    <section class="comment-section">
-        <h2>Книга побажань ✍️</h2>
-        <p>Залиште свої теплі слова або враження від нашого свята!</p>
-        <form id="commentForm">
-            <input type="text" name="name" placeholder="Ваше ім'я" required>
-            <textarea name="wishes" placeholder="Ваше побажання або коментар" required></textarea>
-            <button type="submit" class="link-btn" style="border:none; cursor:pointer;">Надіслати 💌</button>
-        </form>
-        <div id="commentsList" class="comments-list">
-            <div class="spinner"></div>
-        </div>
-        <button id="loadMoreBtn" class="link-btn" style="display:none; margin: 20px auto; border:none; cursor:pointer;">Показати більше 📂</button>
-    </section>
-
-    <div id="toast"></div>
     <script src="post_wedding.js" defer></script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 // --- Конфігурація та константи ---
 const WEDDING_DATE = new Date("2026-10-10T15:00:00");
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwKaxAWQrS76ueztsFH8YB2_Pq_9-yxpq5f-c5mYwFtgc0fjZEjR8wMO7O9rVd1J7W0LA/exec"; // Вставте сюди ваш новий URL
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwIMp4OcQqRkepcIA-DHJhtSK2Ets2JAVliWTCcEpr85pZ06bIUbBBiG3aVDv7N8cH5Nw/exec";
 
 const CONFIG = {
   petalCount: 30,
@@ -63,6 +63,30 @@ function showToast(message) {
   toast.textContent = message;
   toast.classList.add("show");
   setTimeout(() => toast.classList.remove("show"), CONFIG.toastDuration);
+}
+
+async function postFormData(data) {
+  try {
+    const response = await fetch(GOOGLE_SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    return response;
+  } catch (error) {
+    console.warn("POST failed, retrying with no-cors fallback:", error);
+    return await fetch(GOOGLE_SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(data)
+    });
+  }
 }
 
 function openInvite(){
@@ -213,19 +237,14 @@ rsvpForm.addEventListener("submit", async function(e){
   };
 
   try {
-    const response = await fetch(GOOGLE_SCRIPT_URL, {
-      method: "POST",
-      mode: "no-cors", // Дозволяє відправку без помилок CORS
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify(data)
-    });
+    await postFormData(data);
 
     thanksMessage.style.display="block";
     this.reset();
     submitBtn.disabled = false;
     submitBtn.textContent = "Надіслати";
   } catch (error) {
-    showToast("Помилка відправки 😢");
+    showToast("Помилка відправки 😢 Перевірте підключення або налаштування CORS.");
     console.error("Помилка:", error);
     submitBtn.disabled = false;
     submitBtn.textContent = "Надіслати";
@@ -281,8 +300,15 @@ function changeSlide(n) {
 function updateLightboxImage() {
   lightboxImg.style.opacity = 0;
   setTimeout(() => {
-    lightboxImg.src = currentGalleryImages[currentImageIndex];
-    lightboxImg.style.opacity = 1;
+    const src = currentGalleryImages[currentImageIndex];
+    if (src) {
+      lightboxImg.src = src;
+      lightboxImg.onerror = () => console.error("Не вдалося завантажити зображення:", src);
+      lightboxImg.style.opacity = 1;
+    } else {
+      console.error("Помилка: індекс зображення поза межами");
+      closeLightbox();
+    }
   }, 150);
 }
 
@@ -372,7 +398,7 @@ function handleBackgroundMusic() {
   if (document.hidden || document.visibilityState === 'hidden') {
     audio.pause();
   } else if (isPlaying) {
-    audio.play();
+    audio.play().catch(err => console.log("Помилка при відновленні музики:", err));
   }
 }
 
@@ -402,7 +428,13 @@ document.querySelectorAll('.gallery, .location-grid').forEach(container => {
   const images = Array.from(container.querySelectorAll('img.view-img, img.style-img'));
   const sources = images.map((img) => img.dataset.src || img.currentSrc || img.src);
   images.forEach((img, index) => {
-    img.addEventListener('click', () => openLightbox(index, sources));
+    img.addEventListener('click', () => {
+      if (sources[index]) {
+        openLightbox(index, sources);
+      } else {
+        console.warn("Помилка: зображення не завантажилось", img);
+      }
+    });
   });
 });
 
