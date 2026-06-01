@@ -1,84 +1,83 @@
 let isPlaying = false;
-        let fadeInterval;
-        const audio = document.getElementById("postWeddingMusic");
-        const musicBtn = document.querySelector(".music-btn");
-        const playerControls = document.querySelector(".player-controls");
-        const progressBar = document.getElementById("progress-bar");
-        const timeRemainingText = document.getElementById("time-remaining");
+let fadeInterval;
+const audio = document.getElementById("postWeddingMusic");
+const musicBtn = document.getElementById("musicToggleBtn");
+const musicHint = document.getElementById("musicHint");
+const playerControls = document.querySelector(".player-controls");
+const progressBar = document.getElementById("progress-bar");
+const timeRemainingText = document.getElementById("time-remaining");
 
-        function formatTime(seconds) {
-            const min = Math.floor(seconds / 60);
-            const sec = Math.floor(seconds % 60);
-            return `${min}:${sec < 10 ? '0' : ''}${sec}`;
-        }
+function formatTime(seconds) {
+    const min = Math.floor(seconds / 60);
+    const sec = Math.floor(seconds % 60);
+    return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+}
 
-        function toggleMusic() {
-            clearInterval(fadeInterval);
-            if (isPlaying) {
-                // Плавне згасання (Fade Out) перед паузою
-                const fadeStep = 0.05;
-                fadeInterval = setInterval(() => {
-                    if (audio.volume > fadeStep) {
-                        audio.volume -= fadeStep;
-                    } else {
-                        audio.pause();
-                        audio.volume = 1; // Скидаємо гучність для наступного включення
-                        isPlaying = false;
-                        musicBtn.textContent = "🎵";
-                        playerControls.classList.remove("active");
-                        clearInterval(fadeInterval);
-                    }
-                }, 50); // Повне згасання приблизно за 1 секунду
+function setMusicState(playing) {
+    isPlaying = playing;
+    musicBtn.textContent = playing ? "🔇" : "🎵";
+    musicBtn.setAttribute("aria-pressed", playing.toString());
+    playerControls.classList.toggle("active", playing);
+    if (musicHint) {
+        musicHint.textContent = playing ? "Музика грає" : "Натисніть кнопку, щоб увімкнути музику";
+    }
+}
+
+function updateProgress() {
+    if (!audio.duration || isNaN(audio.duration)) return;
+    const progress = (audio.currentTime / audio.duration) * 100;
+    progressBar.style.width = progress + "%";
+    const remaining = Math.max(0, audio.duration - audio.currentTime);
+    timeRemainingText.textContent = "-" + formatTime(remaining);
+}
+
+function isAudioPlaying() {
+    return !audio.paused && !audio.ended && audio.currentTime > 0;
+}
+
+function toggleMusic() {
+    clearInterval(fadeInterval);
+    if (isAudioPlaying()) {
+        const fadeStep = 0.05;
+        fadeInterval = setInterval(() => {
+            if (audio.volume > fadeStep) {
+                audio.volume = Math.max(0, audio.volume - fadeStep);
             } else {
-                // При включенні повертаємо повну гучність
+                audio.pause();
                 audio.volume = 1;
-                
-                audio.play().then(() => {
-                    isPlaying = true;
-                    musicBtn.textContent = "🔇";
-                    playerControls.classList.add("active");
-                }).catch(err => {
-                    console.info("Відтворення заблоковано браузером. Потрібна взаємодія користувача.", err);
-                    // Відновлюємо стан кнопки при помилці
-                    isPlaying = false;
-                    musicBtn.textContent = "🎵";
-                });
+                setMusicState(false);
+                clearInterval(fadeInterval);
             }
-        }
+        }, 50);
+    } else {
+        audio.volume = 1;
+        audio.play().then(() => {
+            setMusicState(true);
+            updateProgress();
+        }).catch(err => {
+            console.info("Відтворення заблоковано браузером. Потрібна взаємодія користувача.", err);
+            setMusicState(false);
+        });
+    }
+}
 
-        function attemptAutoPlay() {
-            if (isPlaying) return;
-            audio.play().then(() => {
-                isPlaying = true;
-                musicBtn.textContent = "🔇";
-                playerControls.classList.add("active");
-            }).catch(err => {
-                console.info("Автовідтворення заблоковано браузером. Музика почнеться після першої взаємодії.", err);
-            });
-        }
+function attemptAutoPlay() {
+    if (isAudioPlaying()) {
+        setMusicState(true);
+        return;
+    }
 
-        audio.ontimeupdate = () => {
-            if (audio.duration) {
-                const progress = (audio.currentTime / audio.duration) * 100;
-                progressBar.style.width = progress + "%";
-                
-                const remaining = audio.duration - audio.currentTime;
-                timeRemainingText.textContent = "-" + formatTime(remaining);
-            }
-        };
+    audio.play().then(() => {
+        setMusicState(true);
+        updateProgress();
+    }).catch(err => {
+        console.info("Автовідтворення заблоковано браузером. Музика почнеться після натискання кнопки.", err);
+        setMusicState(false);
+    });
+}
 
-        // Коли музика закінчиться, повертаємо плеєр у початковий стан
-        audio.onended = () => {
-            isPlaying = false;
-            musicBtn.textContent = "🎵";
-            playerControls.classList.remove("active");
-        };
+audio.addEventListener("loadedmetadata", updateProgress);
+audio.addEventListener("timeupdate", updateProgress);
+audio.addEventListener("ended", () => setMusicState(false));
 
-        // Автоматичний запуск музики після першого кліку користувача по будь-якому місцю сторінки
-        document.addEventListener('click', () => {
-            if (!isPlaying) toggleMusic();
-        }, { once: true });
-
-        // Спроба автоматичного відтворення при завантаженні сторінки
-        attemptAutoPlay();
-
+attemptAutoPlay();
