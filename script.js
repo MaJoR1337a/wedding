@@ -14,6 +14,31 @@ const CONFIG = {
 // --- Кешування DOM елементів ---
 const audio = document.getElementById("bgMusic");
 const musicBtn = document.querySelector(".music-btn");
+
+// Attempt immediate autoplay
+window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        audio.muted = false;
+        audio.play().catch(() => {
+            console.info("Autoplay blocked");
+        });
+    }, 100);
+});
+
+// Try on first user interaction
+document.addEventListener('click', () => {
+    if (audio.paused) {
+        audio.muted = false;
+        audio.play().catch(() => {});
+    }
+}, { once: true });
+
+document.addEventListener('touchend', () => {
+    if (audio.paused) {
+        audio.muted = false;
+        audio.play().catch(() => {});
+    }
+}, { once: true });
 const toast = document.getElementById("toast");
 const envelope = document.getElementById("envelope");
 const mainContent = document.getElementById("mainContent");
@@ -35,26 +60,34 @@ if (currentDate >= WEDDING_DATE) {
 envelope.style.display = "none";
 const videoContainer = document.getElementById("intro-video-container");
 const introVideo = document.getElementById("intro-video");
+let envelopeShown = false;
+let envelopeTimer = null;
 
-// Показати конверт через 5 секунд або коли відео закінчиться
 function showEnvelope() {
+  if (envelopeShown) return;
+  envelopeShown = true;
+  if (envelopeTimer) {
+    clearTimeout(envelopeTimer);
+    envelopeTimer = null;
+  }
+
   if (videoContainer) {
-    videoContainer.style.transition = "opacity 0.8s ease-out";
+    videoContainer.style.transition = "opacity 0.3s ease-out";
     videoContainer.style.opacity = "0";
     setTimeout(() => {
       videoContainer.style.display = "none";
       envelope.style.display = "flex";
       envelope.style.opacity = "0";
       setTimeout(() => {
-        envelope.style.transition = "opacity 0.8s ease-in";
+        envelope.style.transition = "opacity 0.3s ease-in";
         envelope.style.opacity = "1";
       }, 10);
-    }, 800);
+    }, 300);
   }
 }
 
-// Показати конверт через 5 секунд
-setTimeout(showEnvelope, 5000);
+// Показати конверт через 10 секунд
+envelopeTimer = setTimeout(showEnvelope, 10000);
 
 // Якщо відео закінчиться, також показати конверт
 if (introVideo) {
@@ -149,9 +182,9 @@ function openInvite(){
 
       setTimeout(() => {
         showToast("Натисніть 🎵, якщо не чуєте музику");
-      }, 2000);
-    }, 1000);
-  }, 1000);
+      }, 1000);
+    }, 500);
+  }, 500);
 } 
 
 function createPetals(){
