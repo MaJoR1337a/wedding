@@ -73,6 +73,9 @@ function toggleMusic() {
         }, 50);
     } else {
         audio.volume = 1;
+        if (audio.ended) {
+            audio.currentTime = 0;
+        }
         audio.play().then(() => {
             setMusicState(true);
             updateProgress();
