@@ -10,12 +10,32 @@ const musicHint = document.getElementById("musicHint");
 const playerControls = document.querySelector(".player-controls");
 const progressBar = document.getElementById("progress-bar");
 const timeRemainingText = document.getElementById("time-remaining");
+const audioModal = document.getElementById("audioModal");
 
 function formatTime(seconds) {
     const min = Math.floor(seconds / 60);
     const sec = Math.floor(seconds % 60);
     return `${min}:${sec < 10 ? '0' : ''}${sec}`;
 }
+
+function openAudioModal() {
+    console.log("openAudioModal викликано");
+    console.log("audioModal:", audioModal);
+    if (audioModal) {
+        audioModal.classList.add('active');
+        console.log("Клас active додано");
+    } else {
+        console.log("audioModal не знайдена");
+    }
+}
+
+function closeAudioModal() {
+    console.log("closeAudioModal викликано");
+    if (audioModal) {
+        audioModal.classList.remove('active');
+    }
+}
+
 
 function setMusicState(playing) {
     isPlaying = playing;
@@ -110,6 +130,14 @@ audio.addEventListener("ended", () => setMusicState(false));
 
 document.addEventListener("click", unlockAudioOnGesture, { once: true });
 document.addEventListener("touchend", unlockAudioOnGesture, { once: true });
+
+if (audioModal) {
+    audioModal.addEventListener("click", (e) => {
+        if (e.target === audioModal.querySelector(".audio-modal-overlay")) {
+            closeAudioModal();
+        }
+    });
+}
 
 const postWeddingHeader = document.querySelector("h1");
 if (postWeddingHeader) {
