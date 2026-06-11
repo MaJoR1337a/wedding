@@ -2,6 +2,9 @@ let isPlaying = false;
 let fadeInterval;
 let audioUnlocked = false;
 const audio = document.getElementById("postWeddingMusic");
+if (audio) {
+    audio.muted = true;
+}
 const musicBtn = document.getElementById("musicToggleBtn");
 const musicHint = document.getElementById("musicHint");
 const playerControls = document.querySelector(".player-controls");
@@ -38,18 +41,20 @@ function isAudioPlaying() {
 
 function unlockAudioOnGesture() {
     if (audioUnlocked) return;
-    audio.play().then(() => {
-        audio.pause();
-        audio.volume = 1;
-        audioUnlocked = true;
-        if (musicHint) {
-            musicHint.textContent = "Торкніться кнопки, щоб увімкнути музику";
-        }
-    }).catch(() => {
-        if (musicHint) {
-            musicHint.textContent = "Торкніться екрану ще раз, щоб розблокувати звук";
-        }
-    });
+    if (audio) {
+        audio.muted = false;
+        audio.play().then(() => {
+            setMusicState(true);
+            audioUnlocked = true;
+            if (musicHint) {
+                musicHint.textContent = "Музика грає";
+            }
+        }).catch(() => {
+            if (musicHint) {
+                musicHint.textContent = "Торкніться екрану ще раз, щоб увімкнути звук";
+            }
+        });
+    }
 }
 
 function toggleMusic() {
@@ -99,5 +104,10 @@ audio.addEventListener("ended", () => setMusicState(false));
 
 document.addEventListener("click", unlockAudioOnGesture, { once: true });
 document.addEventListener("touchend", unlockAudioOnGesture, { once: true });
+
+const postWeddingHeader = document.querySelector("h1");
+if (postWeddingHeader) {
+    postWeddingHeader.addEventListener("click", unlockAudioOnGesture, { once: true });
+}
 
 attemptAutoPlay();

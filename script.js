@@ -1,5 +1,6 @@
 // --- Конфігурація та константи ---
-const WEDDING_DATE = new Date("2026-10-10T15:00:00");
+const WEDDING_DATE = new Date("2026-10-10T15:00:00+03:00");
+const POST_WEDDING_DATE = new Date("2026-10-11T06:00:00+03:00");
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwFwd_MsQbNQnYIB-pPW8C1us2guGyNBGcHf3u65ckyKCstBO3jk72Ow2d_EnCXz3NHug/exec";
 
 const CONFIG = {
@@ -8,37 +9,12 @@ const CONFIG = {
   fadeStep: 0.05,
   fadeInterval: 50,
   toastDuration: 3000,
-  countdownUpdateRate: 1000 // 1 секунда
+  countdownUpdateRate: 60000 // оновлюємо хвилини без зайвого навантаження
 };
 
 // --- Кешування DOM елементів ---
 const audio = document.getElementById("bgMusic");
 const musicBtn = document.querySelector(".music-btn");
-
-// Attempt immediate autoplay
-window.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-        audio.muted = false;
-        audio.play().catch(() => {
-            console.info("Autoplay blocked");
-        });
-    }, 100);
-});
-
-// Try on first user interaction
-document.addEventListener('click', () => {
-    if (audio.paused) {
-        audio.muted = false;
-        audio.play().catch(() => {});
-    }
-}, { once: true });
-
-document.addEventListener('touchend', () => {
-    if (audio.paused) {
-        audio.muted = false;
-        audio.play().catch(() => {});
-    }
-}, { once: true });
 const toast = document.getElementById("toast");
 const envelope = document.getElementById("envelope");
 const mainContent = document.getElementById("mainContent");
@@ -49,10 +25,12 @@ const thanksMessage = document.getElementById("thanks");
 const scrollTopBtn = document.getElementById("scrollTopBtn");
 const lightbox = document.getElementById('lightbox');
 const lightboxImg = document.getElementById('lightbox-img');
+const introVideoContainer = document.getElementById("intro-video-container");
+const heroTitle = document.querySelector(".hero h1");
 
 // Автоматичне перенаправлення
 const currentDate = new Date();
-if (currentDate >= WEDDING_DATE) {
+if (currentDate >= POST_WEDDING_DATE) {
   window.location.href = "post_wedding.html";
 }
 
@@ -60,6 +38,7 @@ if (currentDate >= WEDDING_DATE) {
 envelope.style.display = "none";
 const videoContainer = document.getElementById("intro-video-container");
 const introVideo = document.getElementById("intro-video");
+const envelopeVideo = document.getElementById("envelope-bg-video");
 let envelopeShown = false;
 let envelopeTimer = null;
 
@@ -72,12 +51,16 @@ function showEnvelope() {
   }
 
   if (videoContainer) {
+    if (introVideo) introVideo.pause();
     videoContainer.style.transition = "opacity 0.3s ease-out";
     videoContainer.style.opacity = "0";
     setTimeout(() => {
       videoContainer.style.display = "none";
       envelope.style.display = "flex";
       envelope.style.opacity = "0";
+      if (envelopeVideo) {
+        envelopeVideo.play().catch(() => {});
+      }
       setTimeout(() => {
         envelope.style.transition = "opacity 0.3s ease-in";
         envelope.style.opacity = "1";
@@ -98,27 +81,48 @@ if (introVideo) {
 let isPlaying = false;
 let fadeInterval;
 
+function setMusicButton(playing) {
+  isPlaying = playing;
+  if (musicBtn) {
+    musicBtn.textContent = playing ? "🔇" : "🎵";
+    musicBtn.setAttribute("aria-pressed", playing.toString());
+  }
+}
+
+function playMusic() {
+  if (!audio) return Promise.reject(new Error("Audio element not found"));
+  clearInterval(fadeInterval);
+  audio.volume = 1;
+  audio.muted = false;
+  return audio.play().then(() => {
+    setMusicButton(true);
+  });
+}
+
+function enableIntroAudio() {
+  if (audio && !isPlaying) {
+    playMusic().catch(() => {});
+  }
+}
+
 function toggleMusic() {
   clearInterval(fadeInterval);
-  if (isPlaying) {
+  if (isPlaying && audio && !audio.paused) {
     fadeInterval = setInterval(() => {
       if (audio.volume > CONFIG.fadeStep) {
-        audio.volume -= CONFIG.fadeStep;
+        audio.volume = Math.max(0, audio.volume - CONFIG.fadeStep);
       } else {
         audio.pause();
         audio.volume = 1;
-        isPlaying = false;
-        musicBtn.textContent = "🎵";
+        setMusicButton(false);
         clearInterval(fadeInterval);
       }
     }, CONFIG.fadeInterval);
   } else {
-    audio.volume = 1;
-    audio.muted = false;
-    audio.play().then(() => {
-      isPlaying = true;
-      musicBtn.textContent = "🔇";
-    }).catch(err => console.log("Music play blocked:", err));
+    playMusic().catch(() => {
+      setMusicButton(false);
+      showToast("Натисніть кнопку музики ще раз, щоб увімкнути звук");
+    });
   }
 }
 
@@ -128,35 +132,53 @@ function showToast(message) {
   setTimeout(() => toast.classList.remove("show"), CONFIG.toastDuration);
 }
 
+function hideAlcoholOptions() {
+  alcoholWrapper.classList.remove('show');
+  setTimeout(() => {
+    if (!alcoholWrapper.classList.contains('show')) {
+      alcoholWrapper.style.display = "none";
+    }
+  }, 500);
+}
+
+function showAlcoholOptions() {
+  alcoholWrapper.style.display = "block";
+  setTimeout(() => {
+    alcoholWrapper.classList.add('show');
+  }, 10);
+}
+
 async function postFormData(data) {
-  console.log("RSVP post data:", data);
   const body = new URLSearchParams();
   Object.entries(data).forEach(([key, value]) => body.append(key, value));
 
-  try {
-    const response = await fetch(GOOGLE_SCRIPT_URL, {
-      method: "POST",
-      body
-    });
+  const response = await fetch(GOOGLE_SCRIPT_URL, {
+    method: "POST",
+    mode: "cors",
+    credentials: "omit",
+    body
+  });
 
-    console.log("Fetch response:", response);
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
-    }
-
-    const json = await response.json();
-    console.log("Server response:", json);
-    return json;
-  } catch (error) {
-    console.warn("Primary POST failed, retrying with no-cors fallback:", error);
-    const response = await fetch(GOOGLE_SCRIPT_URL, {
-      method: "POST",
-      mode: "no-cors",
-      body
-    });
-    console.log("No-cors response:", response);
-    return { type: response.type || "opaque", result: "success" };
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => "(no body)");
+    throw new Error(`HTTP ${response.status}: ${errorText}`);
   }
+
+  let result;
+  try {
+    result = await response.json();
+  } catch (jsonError) {
+    const text = await response.text().catch(() => "(no body)");
+    console.error("RSVP response parse error:", jsonError, "body:", text);
+    throw new Error("Неочікуваний формат відповіді сервера.");
+  }
+
+  const success = result && (result.result === "success" || result.success === true);
+  if (!success) {
+    throw new Error(result && result.error ? result.error : "Server response was not successful");
+  }
+
+  return result;
 }
 
 function openInvite(){
@@ -199,12 +221,20 @@ function createPetals(){
 }
 
 let countdownAnimated = false;
+let countdownInterval = null;
 function updateCountdown(){
   const now = new Date().getTime();
   const distance = WEDDING_DATE.getTime() - now;
 
-  if(distance < 0){
-    countdownDiv.innerHTML = "Наш день настав 🤍";
+  if (distance < 0) {
+    const finishedMessage = `<div class="countdown-complete">Наш день настав 🤍</div>`;
+    if (countdownDiv.innerHTML !== finishedMessage) {
+      countdownDiv.innerHTML = finishedMessage;
+    }
+    if (countdownInterval) {
+      clearInterval(countdownInterval);
+      countdownInterval = null;
+    }
     return;
   }
 
@@ -232,7 +262,7 @@ function updateCountdown(){
   }
 }
 
-setInterval(updateCountdown, CONFIG.countdownUpdateRate);
+countdownInterval = setInterval(updateCountdown, CONFIG.countdownUpdateRate);
 updateCountdown();
 
 // Эффект параллакса для фотографий (тільки на десктопі)
@@ -292,8 +322,6 @@ rsvpForm.addEventListener("submit", async function(e){
   let alcohol = Array.from(alcoholChecked).map(cb => cb.value).join(", ");
 
   const submitBtn = this.querySelector("button[type='submit']");
-  fireConfetti(submitBtn); // Запуск конфетті
-  
   submitBtn.disabled = true;
   submitBtn.textContent = "Надсилаю...";
 
@@ -307,19 +335,14 @@ rsvpForm.addEventListener("submit", async function(e){
   };
 
   try {
-    const result = await postFormData(data);
-    const success = result && (result.result === "success" || result.type === "opaque");
-
-    if (!success) {
-      throw new Error(result && result.error ? result.error : "Server response was not successful");
-    }
-
+    await postFormData(data);
+    fireConfetti(submitBtn);
     thanksMessage.style.display="block";
     this.reset();
+    hideAlcoholOptions();
     submitBtn.disabled = false;
     submitBtn.textContent = "Надіслати";
   } catch (error) {
-    showToast("Помилка відправки 😢 Перевірте підключення або налаштування CORS.");
     console.error("Помилка:", error);
     submitBtn.disabled = false;
     submitBtn.textContent = "Надіслати";
@@ -329,15 +352,9 @@ rsvpForm.addEventListener("submit", async function(e){
 // Логіка для форми: ховаємо алкоголь, якщо гість не прийде
 document.querySelector("select[name='attendance']").addEventListener("change", function() {
   if (this.value === "no") {
-    alcoholWrapper.classList.remove('show');
-    setTimeout(() => {
-      if(this.value === "no") alcoholWrapper.style.display = "none";
-    }, 500); 
+    hideAlcoholOptions();
   } else {
-    alcoholWrapper.style.display = "block";
-    setTimeout(() => {
-      alcoholWrapper.classList.add('show');
-    }, 10); // Невелика затримка, щоб display:block застосувався до початку transition
+    showAlcoholOptions();
   }
 });
 
@@ -497,6 +514,14 @@ const imageObserver = new IntersectionObserver((entries, observer) => {
 document.querySelectorAll('img.lazy').forEach(img => {
   imageObserver.observe(img);
 });
+
+if (introVideoContainer) {
+  introVideoContainer.addEventListener('click', enableIntroAudio);
+}
+
+if (heroTitle) {
+  heroTitle.addEventListener('click', enableIntroAudio);
+}
 
 // Код для відкриття лайтбоксу на клік по зображеннях
 document.querySelectorAll('.gallery, .location-grid').forEach(container => {

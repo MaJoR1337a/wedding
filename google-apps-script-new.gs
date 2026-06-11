@@ -14,7 +14,13 @@ function doPost(e) {
   lock.tryLock(10000);
   
   try {
-    var data = JSON.parse(e.postData.contents);
+    var data;
+    try {
+      data = JSON.parse(e.postData.contents);
+    } catch (jsonError) {
+      data = e.parameter || {};
+    }
+
     var spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
     
     // Якщо це коментар (attendance = "comment_only")

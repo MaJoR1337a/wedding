@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="post_wedding.css">
 </head>
 <body>
-    <audio id="postWeddingMusic" preload="metadata" loop playsinline>
+    <audio id="postWeddingMusic" preload="metadata" loop playsinline muted>
         <source src="ZAYN_Dusk_Till_Dawn_feat_Sia128kb.mp3" type="audio/mpeg">
     </audio>
 
@@ -31,11 +31,12 @@
         </div>
         <div class="music-control">
             <button id="musicToggleBtn" class="music-btn" onclick="toggleMusic()" aria-label="Play/Pause" aria-pressed="false">🎵</button>
-            <div id="musicHint" class="music-hint">Торкніться екрану, щоб розблокувати звук</div>
+            <div id="musicHint" class="music-hint">Тицни сюди для увімкнення аудіо доріжки</div>
         </div>
     </div>
 
     <h1>Наші спогади!</h1>
+    <div class="post-audio-hint">Тицни сюди для увімкнення аудіо доріжки</div>
     <p>Дякуємо, що розділили з нами цей особливий день. Ось посилання на фотографії та відео:</p>
     <div class="links-container">
         <span class="link-btn disabled-link" aria-disabled="true">Фотографії 📸 (скоро)</span>
