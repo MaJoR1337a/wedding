@@ -23,7 +23,7 @@ function setMusicState(playing) {
     musicBtn.setAttribute("aria-pressed", playing.toString());
     playerControls.classList.toggle("active", playing);
     if (musicHint) {
-        musicHint.textContent = playing ? "Музика грає" : "Натисніть кнопку, щоб увімкнути музику";
+        musicHint.textContent = playing ? "Натисніть кнопку, щоб вимкнути звук" : "Натисніть кнопку, щоб увімкнути звук";
     }
 }
 
@@ -41,6 +41,9 @@ function isAudioPlaying() {
 
 function unlockAudioOnGesture() {
     if (audioUnlocked) return;
+    if (playerControls) {
+        playerControls.classList.add('visible');
+    }
     if (audio) {
         audio.muted = false;
         audio.play().then(() => {
