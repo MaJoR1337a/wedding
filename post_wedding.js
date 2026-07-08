@@ -81,44 +81,43 @@ function unlockAudioOnGesture() {
 }
 
 function toggleMusic() {
+    console.log("toggleMusic викликано, isPlaying:", isPlaying, "audio.paused:", audio.paused);
+    
     if (!audio) return;
     
     clearInterval(fadeInterval);
     
-    if (isAudioPlaying()) {
-        // Паузу музику
-        const fadeStep = 0.05;
-        fadeInterval = setInterval(() => {
-            if (audio.volume > fadeStep) {
-                audio.volume = Math.max(0, audio.volume - fadeStep);
-            } else {
-                audio.pause();
-                audio.volume = 1;
-                setMusicState(false);
-                clearInterval(fadeInterval);
-            }
-        }, 50);
-    } else {
-        // Запусти музику
-        if (!audioUnlocked) {
-            audio.muted = false;
-            audioUnlocked = true;
-        }
-        audio.volume = 1;
-        if (audio.ended) {
-            audio.currentTime = 0;
-        }
-        audio.play().then(() => {
-            setMusicState(true);
-            updateProgress();
-            if (playerControls) {
-                playerControls.classList.add('visible');
-            }
-        }).catch(err => {
-            console.info("Відтворення заблоковано браузером.", err);
-            setMusicState(false);
-        });
+    // Якщо музика грає - ставимо паузу
+    if (!audio.paused && !audio.ended) {
+        console.log("Ставимо паузу");
+        audio.pause();
+        setMusicState(false);
+        return;
     }
+    
+    // Якщо музика на паузі або не запущена - запускаємо
+    console.log("Запускаємо музику");
+    if (!audioUnlocked) {
+        audio.muted = false;
+        audioUnlocked = true;
+    }
+    
+    audio.volume = 1;
+    if (audio.ended) {
+        audio.currentTime = 0;
+    }
+    
+    audio.play().then(() => {
+        console.log("Музика запущена");
+        setMusicState(true);
+        updateProgress();
+        if (playerControls) {
+            playerControls.classList.add('visible');
+        }
+    }).catch(err => {
+        console.error("Помилка при відтворенні:", err);
+        setMusicState(false);
+    });
 }
 
 function attemptAutoPlay() {
