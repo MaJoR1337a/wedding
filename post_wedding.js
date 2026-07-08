@@ -20,10 +20,9 @@ function formatTime(seconds) {
 
 function openAudioModal() {
     console.log("openAudioModal викликано");
-    console.log("audioModal:", audioModal);
     if (audioModal) {
         audioModal.classList.add('active');
-        console.log("Клас active додано");
+        console.log("Модал відкрито, classlist:", audioModal.className);
     } else {
         console.log("audioModal не знайдена");
     }
@@ -33,6 +32,7 @@ function closeAudioModal() {
     console.log("closeAudioModal викликано");
     if (audioModal) {
         audioModal.classList.remove('active');
+        console.log("Модал закрито");
     }
 }
 
