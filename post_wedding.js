@@ -81,8 +81,12 @@ function unlockAudioOnGesture() {
 }
 
 function toggleMusic() {
+    if (!audio) return;
+    
     clearInterval(fadeInterval);
+    
     if (isAudioPlaying()) {
+        // Паузу музику
         const fadeStep = 0.05;
         fadeInterval = setInterval(() => {
             if (audio.volume > fadeStep) {
@@ -95,6 +99,11 @@ function toggleMusic() {
             }
         }, 50);
     } else {
+        // Запусти музику
+        if (!audioUnlocked) {
+            audio.muted = false;
+            audioUnlocked = true;
+        }
         audio.volume = 1;
         if (audio.ended) {
             audio.currentTime = 0;
@@ -102,8 +111,11 @@ function toggleMusic() {
         audio.play().then(() => {
             setMusicState(true);
             updateProgress();
+            if (playerControls) {
+                playerControls.classList.add('visible');
+            }
         }).catch(err => {
-            console.info("Відтворення заблоковано браузером. Потрібна взаємодія користувача.", err);
+            console.info("Відтворення заблоковано браузером.", err);
             setMusicState(false);
         });
     }
